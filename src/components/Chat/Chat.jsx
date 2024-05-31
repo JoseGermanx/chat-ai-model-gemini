@@ -32,7 +32,7 @@ const generationConfig = {
 
 const Chat = () => {
   const [loading, setLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState([]);
+  const [chatHistory, setChatHistory] = useState(JSON.parse(localStorage.getItem("chatHistory")) || []);
   const bottomRef = useRef(null);
   const [message, setMessage] = useState("");
   const loadingRef = useRef(null);
@@ -45,6 +45,13 @@ const Chat = () => {
 
   const dia = new Date();
   const hora = dia.getHours();
+
+  // alamcenar el chatHistory en localStorage
+
+  useEffect(() => {
+      localStorage.setItem("chatHistory", JSON.stringify(chatHistory) || []);
+  }, [chatHistory])
+
 
   const chat = model.startChat({
     history: [

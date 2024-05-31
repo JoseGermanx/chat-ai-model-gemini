@@ -200,3 +200,10 @@ input {
   .botton-botton {
     margin-bottom: 2px;
   }
+
+  pre {
+    font-size: 0.8em;
+    background-color: #e2e0e0;
+    padding: 20px;
+    border-radius: 10px;
+  }
