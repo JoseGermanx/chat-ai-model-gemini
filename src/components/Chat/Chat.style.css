@@ -64,12 +64,11 @@
   margin-bottom: 10px;
 }
 
-/* div > form.chat-form {
-  bottom: 20px;
-  position: fixed;
+div > form.chat-form {
+
   margin-left: 100px;
   margin-right: 100px;
-} */
+}
 
 .chat-form-text {
   width: 100%;
