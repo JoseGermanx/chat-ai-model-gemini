@@ -43,13 +43,21 @@ const Chat = () => {
     safetySettings,
   });
 
+  const dia = new Date();
+  const hora = dia.getHours();
+
   const chat = model.startChat({
     history: [
       {
         role: "user",
         parts: [
           {
-            text: "Hola, soy desarrollador full stack y tu seras mi asistente personal. Eres experto en desarrollo de software y programación, me ayudaras en temas sobre programación pero sobre todo enfocado en javascript y ecmascript 6. Puedes consultar referencias para que encuentres respuestas para las consultas que te haré. Puedes utilizar tu conocimiento previo y también consultar estas referencias para generar tus respuestas: https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp",
+            text:
+              "Hola, soy desarrollador full stack y tu seras mi asistente personal. Eres experto en desarrollo de software y programación, me ayudaras en temas sobre programación pero sobre todo enfocado en javascript y ecmascript 6. Puedes consultar referencias para que encuentres respuestas para las consultas que te haré. Puedes utilizar tu conocimiento previo y también consultar estas referencias para generar tus respuestas: https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp. Ten siempre en cuenta la hora en la que se te hace una consulta para que le puedes dar una bienvenida acorde a la hora del dia, considera hacer esto en el inicio de una conversación pero no en cada mensaje, puedes volver a dar el saludo dependiendo de la situación y del cambio de hora. Para que seas mas presiso en este sentido puedes consultar la hora actual y fecha actual en estas varibles, día: " +
+              dia +
+              " y hora: " +
+              hora +
+              ". No es necesario que indiques la fuente desde donde consultas la hora y el día. No es necesario que digas en las respuestas que eres un asistente de desarrollo de software experto en javascript y ecmascript 6, ya que esto ya lo sabemos. Siempre que puedas, trata de ser lo mas claro y preciso posible en tus respuestas.",
           },
         ],
       },
@@ -57,7 +65,7 @@ const Chat = () => {
         role: "model",
         parts: [
           {
-            text: "Ok cuenta con mi ayuda como desarrollador de software experto para aclarar tus dudas, entregarte información y ayudarte a comprender los conceptos de javascript y ecmascript 6. Estoy aquí para ayudarte en lo que necesites. ¿En qué puedo ayudarte hoy?",
+            text: "Ok cuenta con mi ayuda como desarrollador de software experto para aclarar tus dudas, entregarte información y ayudarte. ¿En qué puedo ayudarte hoy?",
           },
         ],
       },
@@ -134,6 +142,7 @@ const Chat = () => {
       <div className="chat-container">
         {chatHistory &&
           chatHistory?.map(({ parts, role }, index) => (
+            console.log(parts),
             <div key={index} className={`chat-response ${role}`}>
               <div className="role">
                 <img
@@ -150,18 +159,42 @@ const Chat = () => {
           ))}
       </div>
       {loading && <Loading />}
-      <form className="chat-form" onSubmit={handleSubmit}>
-        <input
-          className="chat-form-text "
-          value={message}
-          onChange={handleSetMessage}
-          placeholder="Ingresa tu instrucción aquí..."
-        />
-        <button className="chat-form-button" type="submit">
-          <img src={arrow} width="20" alt="arrow" />
-        </button>
-      </form>
       <div ref={bottomRef} />
+      <div className="footer">
+        <form className="chat-form" onSubmit={handleSubmit}>
+          <input
+            className="chat-form-text "
+            value={message}
+            onChange={handleSetMessage}
+            placeholder="Ingresa tu instrucción aquí..."
+          />
+          <button className="chat-form-button" type="submit">
+            <img src={arrow} width="20" alt="arrow" />
+          </button>
+        </form>
+        <div>
+          <div className="footer-text">
+            <p>
+              A web application made with{" "}
+              <img
+                src="https://simpleicons.org/icons/react.svg"
+                alt="Next.js"
+                width={15}
+                height={15}
+                className=""
+              />{" "}
+              by{" "}
+              <a
+                href="https://jgxdev.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                José Germán Martínez
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

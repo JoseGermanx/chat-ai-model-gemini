@@ -13,7 +13,7 @@ const Loading = (props) => {
   const backgroundColor = theme === 'dark' ? '#1e293b ' : '#CCFAF9';
   const foregroundColor = theme === 'dark' ? '#155e75  ' : '#2C3E50';
   return (
-    <div className="chat-container">
+    <div className="">
     <ContentLoader
       viewBox="30 0 600 500"
       backgroundColor={backgroundColor}// Light gray background
@@ -22,25 +22,16 @@ const Loading = (props) => {
       {...props}
     >
      
-     <circle cx="40" cy="20" r="8"  width="100" height="10"  />
-      <rect x="56" y="12" rx="5" ry="5" width="500" height="10" />
-      <rect x="56" y="29" rx="5" ry="5" width="480" height="10" />
-      <rect x="56" y="46" rx="5" ry="5" width="450" height="10" />
-      <rect x="56" y="63" rx="5" ry="5" width="420" height="10" />
-      <rect x="56" y="80" rx="5" ry="5" width="390" height="10" />
-
-      
+     <circle cx="75" cy="20" r="8"  width="100" height="10"  />
+      <rect x="90" y="12" rx="5" ry="5" width="500" height="10" />
+      <rect x="90" y="29" rx="5" ry="5" width="480" height="10" />
+      <rect x="90" y="46" rx="5" ry="5" width="450" height="10" />
+      <rect x="90" y="63" rx="5" ry="5" width="420" height="10" />
+      <rect x="90" y="80" rx="5" ry="5" width="390" height="10" />
     </ContentLoader>
     </div>
   );
 
-};
-
-Loading.metadata = {
-  name: "HAIDER Ali", // My name
-  github: "https://github.com/HaiderAli170", // Github username
-  description: "Chat GPT", // Little tagline
-  filename: "ChatGPT", // filename of your loader
 };
 
 export default Loading;
