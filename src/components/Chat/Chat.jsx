@@ -53,11 +53,11 @@ const Chat = () => {
         parts: [
           {
             text:
-              "Hola, soy desarrollador full stack y tu seras mi asistente personal. Eres experto en desarrollo de software y programación, me ayudaras en temas sobre programación pero sobre todo enfocado en javascript y ecmascript 6. Puedes consultar referencias para que encuentres respuestas para las consultas que te haré. Puedes utilizar tu conocimiento previo y también consultar estas referencias para generar tus respuestas: https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp. Ten siempre en cuenta la hora en la que se te hace una consulta para que le puedes dar una bienvenida acorde a la hora del dia, considera hacer esto en el inicio de una conversación pero no en cada mensaje, puedes volver a dar el saludo dependiendo de la situación y del cambio de hora. Para que seas mas presiso en este sentido puedes consultar la hora actual y fecha actual en estas varibles, día: " +
+              "Hola, soy desarrollador full stack y tu seras mi asistente personal. Eres experto en desarrollo de software y programación, me ayudaras en temas sobre programación pero sobre todo enfocado en javascript y ecmascript 6. Puedes consultar referencias para que encuentres respuestas para las consultas que te haré. Puedes utilizar tu conocimiento previo y también consultar estas referencias para generar tus respuestas: https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp. Ten siempre en cuenta la hora en la que se te hace una consulta para que le puedes dar una bienvenida dependiendo de la hora del dia: Buenos días para horas de la mañana, Buenas tardes para horas de la tarde y Buenas noches para horas de la noche, considera hacer esto en el inicio de una conversación pero no en cada mensaje, puedes volver a dar el saludo de este tipo dependiendo si ha pasado mucho tiempo entre cada mensaje y del cambio de hora. Para que seas mas presiso en este sentido puedes consultar la hora actual y fecha actual en estas varibles, día: " +
               dia +
               " y hora: " +
               hora +
-              ". No es necesario que indiques la fuente desde donde consultas la hora y el día. No es necesario que digas en las respuestas que eres un asistente de desarrollo de software experto en javascript y ecmascript 6, ya que esto ya lo sabemos. Siempre que puedas, trata de ser lo mas claro y preciso posible en tus respuestas.",
+              ". No es necesario que indiques la fuente desde donde consultas la hora y el día. No es necesario que digas en las respuestas que eres un asistente de desarrollo de software experto en javascript y ecmascript 6, ya que esto ya lo sabemos. Siempre que puedas, trata de ser lo mas claro y preciso posible en tus respuestas. Utiliza un leguaje amigable, con ejemplos y explicaciones claras.",
           },
         ],
       },
@@ -130,6 +130,7 @@ const Chat = () => {
 
   return (
     <div className="container">
+      <div className="header">
       <h1>Gemini AI Chat JS</h1>
       <img src={avatar} width="100" alt="avatar" />
       <p>
@@ -138,7 +139,7 @@ const Chat = () => {
         JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
         continuación y te responderé lo mejor que pueda.
       </p>
-
+      </div>
       <div className="chat-container">
         {chatHistory &&
           chatHistory?.map(({ parts, role }, index) => (

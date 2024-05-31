@@ -11,3 +11,13 @@ body {
   font-family: 'Roboto', sans-serif;
   font-size: x-large;
 }
+
+
+@media (max-width: 768px) {
+  #root {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+  }
+}

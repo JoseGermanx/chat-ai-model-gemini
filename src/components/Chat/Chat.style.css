@@ -5,6 +5,9 @@
 
 } */
 
+.header {
+  padding: 2rem;
+}
 .chat-container {
   display: flex;
   justify-content: space-between;
@@ -124,10 +127,6 @@ input {
 /* media queries para smartphone */
 
 @media (max-width: 768px) {
-  .chat-container {
-    max-width: 100%;
-    padding: 1em;
-  }
 
   .chat-form {
     padding: 0.5em;
@@ -146,7 +145,41 @@ input {
   .chat-message {
     padding: 5px;
     margin: 1em;
+    font-size: 8px;
   }
+
+  .role {
+    padding: 0;
+    margin-top: 1em;
+  }
+
+  input {
+    padding: 1px;
+    width: 100%;
+  }
+
+  .footer {
+    padding: 0.5em;
+    margin-right: 20px;
+
+  }
+
+  .chat-form-button {
+    background-color: #f1f0f0;
+      text-decoration: none;
+      margin: 1px 1px; 
+      cursor: pointer;
+      margin-right: 20px;
+  }
+
+  .chat-container {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-bottom: 100px;
+    padding: 1em;
+  }
+
 }
 
 .footer {
