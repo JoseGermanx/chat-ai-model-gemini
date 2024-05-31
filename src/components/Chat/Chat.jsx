@@ -7,9 +7,9 @@ import {
 import Markdown from "react-markdown";
 import Loading from "../Loading/Loading";
 import "./Chat.style.css";
-import avatar from "./../../assets/avatar.svg";
+import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
-import ia from "./../../assets/ia.svg";
+import ia from "./../../assets/star-1-svgrepo-com.svg";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 
