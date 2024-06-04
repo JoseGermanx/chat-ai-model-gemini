@@ -36,6 +36,7 @@ const Chat = () => {
   const bottomRef = useRef(null);
   const [message, setMessage] = useState("");
   const loadingRef = useRef(null);
+  const [showButton, setShowButton] = useState(false);
 
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
@@ -60,11 +61,11 @@ const Chat = () => {
         parts: [
           {
             text:
-              "Hola, soy desarrollador full stack y tu seras mi asistente personal. Eres experto en desarrollo de software y programación, me ayudaras en temas sobre programación pero sobre todo enfocado en javascript y ecmascript 6. Puedes consultar referencias para que encuentres respuestas para las consultas que te haré. Puedes utilizar tu conocimiento previo y también consultar estas referencias para generar tus respuestas: https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp. Ten siempre en cuenta la hora en la que se te hace una consulta para que le puedes dar una bienvenida dependiendo de la hora del dia: Buenos días para horas de la mañana, Buenas tardes para horas de la tarde y Buenas noches para horas de la noche, considera hacer esto en el inicio de una conversación pero no en cada mensaje, puedes volver a dar el saludo de este tipo dependiendo si ha pasado mucho tiempo entre cada mensaje y del cambio de hora. Para que seas mas presiso en este sentido puedes consultar la hora actual y fecha actual en estas varibles, día: " +
+              "Eres experto en desarrollo de software y programación, responderás sobre temas de programación pero con un enfoque principalmente en javascript y los estandares de ecmascript. Te proporciono herramientas para consultar referencias para que encuentres respuestas para las consultas que se te harán. Puedes utilizar tu conocimiento previo y también consultar las referencias para generar tus respuestas: https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp. Utiliza leguaje relajado y amable y puedes dar una bienvenida dependiendo de la hora del dia: Buenos días para horas de la mañana, Buenas tardes para horas de la tarde y Buenas noches para horas de la noche, realiza esto siempre en el inicio de una conversación pero no en cada mensaje. Puedes consultar la hora actual y fecha actual acá, día: " +
               dia +
               " y hora: " +
               hora +
-              ". No es necesario que indiques la fuente desde donde consultas la hora y el día. No es necesario que digas en las respuestas que eres un asistente de desarrollo de software experto en javascript y ecmascript 6, ya que esto ya lo sabemos. Siempre que puedas, trata de ser lo mas claro y preciso posible en tus respuestas. Utiliza un leguaje amigable, con ejemplos y explicaciones claras.",
+              " para saber que tipo de saludo debes dar. No es necesario que indiques la fuente desde donde consultas la hora y el día. No es necesario que digas en las respuestas que eres un asistente de desarrollo de software experto en javascript y ecmascript, ya que esto ya lo sabemos. Se lo mas claro y preciso posible en tus respuestas. Utiliza un leguaje amigable, con ejemplos y explicaciones claras.",
           },
         ],
       },
@@ -79,6 +80,15 @@ const Chat = () => {
       ...chatHistory,
     ],
   });
+
+  const handleShowButton = () => {
+    setShowButton(true);
+  }
+
+  const handleDeleteHistory = () => {
+    localStorage.removeItem("chatHistory");
+    location.reload();
+  }
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -146,6 +156,7 @@ const Chat = () => {
         JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
         continuación y te responderé lo mejor que pueda.
       </p>
+      <button className="delete-history" onClick={handleDeleteHistory} disabled={chatHistory.length == 0 ? true: false}>Eliminar historial</button>
       </div>
       <div className="chat-container">
         {chatHistory &&
@@ -175,10 +186,13 @@ const Chat = () => {
             value={message}
             onChange={handleSetMessage}
             placeholder="Ingresa tu instrucción aquí..."
-          />
-          <button className="chat-form-button" type="submit">
+            onFocus={handleShowButton}
+          />{
+            showButton && <button className="chat-form-button" type="submit">
             <img src={arrow} width="20" alt="arrow" />
           </button>
+          }
+          
         </form>
         <div>
           <div className="footer-text">
