@@ -188,7 +188,13 @@ input {
     margin-bottom: 100px;
     padding: 1em;
   }
-
+.footer-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 20px;
+}
 }
 
 .footer {
