@@ -163,7 +163,7 @@ const Chat = () => {
         JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
         continuación y te responderé lo mejor que pueda.
       </p>
-      <button className="delete-history" onClick={handleDeleteHistory} disabled={chatHistory.length == 0 ? true: false}>Eliminar historial</button>
+      <button className="delete-history" onClick={handleDeleteHistory} disabled={chatHistory.length == 0 ? true: false}>Eliminar historial del chat</button>
       </div>
       <div className="chat-container">
         {chatHistory &&
