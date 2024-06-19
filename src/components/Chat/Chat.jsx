@@ -37,6 +37,7 @@ const Chat = () => {
   const [message, setMessage] = useState("");
   const loadingRef = useRef(null);
   const [showButton, setShowButton] = useState(false);
+  const [imgProfile, setImgProfile] = useState(avatar);
 
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
@@ -52,6 +53,12 @@ const Chat = () => {
   useEffect(() => {
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory) || []);
   }, [chatHistory])
+
+  useEffect(()=> {
+    if (localStorage.getItem("profile")) {
+      setImgProfile(JSON.parse(localStorage.getItem("profile")).picture);
+    }
+  }, [])
 
 
   const chat = model.startChat({
@@ -165,9 +172,10 @@ const Chat = () => {
             <div key={index} className={`chat-response ${role}`}>
               <div className="role">
                 <img
-                  src={role === "model" ? ia : avatar}
-                  width="50"
+                  src={role === "model"  ? ia : imgProfile}
+                  width="30"
                   alt="avatar"
+                  style={{ borderRadius: "50%" }}
                 />
               </div>
               <div className="chat-message">
