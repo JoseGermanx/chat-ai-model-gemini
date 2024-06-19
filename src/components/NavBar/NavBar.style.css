@@ -57,3 +57,13 @@
 .profile:hover {
   cursor: pointer;
 }
+
+.btn-login-logout{
+  display: flex;
+  font-size: 12px;
+  align-items: center;
+}
+
+.btn-login-logout > span {
+  margin-right: 5px;
+}
