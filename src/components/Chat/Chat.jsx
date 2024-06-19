@@ -214,7 +214,6 @@ const Chat = () => {
                 className=""
               />{" "}
               by{" "}
-              </p>
               <a
                 href="https://jgxdev.com"
                 target="_blank"
@@ -222,7 +221,7 @@ const Chat = () => {
               >
                 José Germán Martínez
               </a>
-           
+            </p>
           </div>
         </div>
       </div>
