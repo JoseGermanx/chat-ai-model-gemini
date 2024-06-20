@@ -207,11 +207,11 @@ const Chat = () => {
         </form>
         <div>
           <div className="footer-text">
-            <p>
+            {/* <p>
               Este chat es un proyecto de demostración y no debe ser utilizado
               para preguntas críticas o sensibles. Las respuestas generadas por
               este modelo no son 100% precisas y pueden contener errores.
-            </p>
+            </p> */}
             <p>
               A web application made with{" "}
               <img
