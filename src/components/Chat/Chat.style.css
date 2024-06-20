@@ -1,10 +1,4 @@
-/* .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-} */
-
+@import url('../../styles/vars.css');
 .header {
   padding: 2rem;
 }
@@ -53,7 +47,7 @@
 }
 
 .chat-form {
-  background-color: #f1f0f0;
+  background-color: var(--imput-color);
   border-radius: 30px;
   left: 0;
   z-index: 1000;
@@ -73,7 +67,7 @@ div > form.chat-form {
 
 
 .chat-form-button {
-  background-color: #f1f0f0;
+  background-color: var(--imput-color);
     border: none;
     color: transparent;
     text-align: center;
@@ -114,14 +108,18 @@ input:focus {
 
 input {
   font-family: 'Roboto', sans-serif;
-  color: gray;
   font-size: 0.7em;
   padding: 25px;
   border: none;
-  background-color: #f1f0f0;
+  background-color: var(--imput-color);
   margin-left: 20px;
   width: 100%;
   border-radius: 30px;
+  color: var(--imput-text-color);
+}
+
+input[type="text"] {
+  color: var(--imput-text-color);
 }
 
 /* media queries para smartphone */
@@ -162,6 +160,10 @@ input {
     margin-top: 1em;
   }
 
+  .role > img {
+    fill: var(--icon-color);
+  }
+
   input {
     padding: 1px;
     width: 100%;
@@ -174,7 +176,6 @@ input {
   }
 
   .chat-form-button {
-    background-color: #f1f0f0;
       text-decoration: none;
       margin: 1px 1px; 
       cursor: pointer;
@@ -201,8 +202,8 @@ input {
   left: 0;
   bottom: 0;
   width: 100%;
-  background: linear-gradient(0deg, rgb(255, 255, 255), rgba(255, 255, 255, 0.911));
-  color: rgb(73, 71, 71);
+  background: var(--accent);
+  
   text-align: center;
   padding: 1em;
   position: fixed;

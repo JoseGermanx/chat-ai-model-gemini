@@ -10,6 +10,7 @@ import "./Chat.style.css";
 import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
 import ia from "./../../assets/star-1-svgrepo-com.svg";
+import Switch from "../Switch/Switch";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 
@@ -154,6 +155,7 @@ const Chat = () => {
 
   return (
     <div className="container">
+      {/* <Switch /> */}
       <div className="header">
       <h1>Asistente Personal</h1>
       <img src={ia} width="100" alt="avatar" />
@@ -195,6 +197,7 @@ const Chat = () => {
             onChange={handleSetMessage}
             placeholder="Ingresa tu instrucción aquí..."
             onFocus={handleShowButton}
+            type="text"
           />{
             showButton && <button className="chat-form-button" type="submit">
             <img src={arrow} width="20" alt="arrow" />
@@ -204,6 +207,11 @@ const Chat = () => {
         </form>
         <div>
           <div className="footer-text">
+            <p>
+              Este chat es un proyecto de demostración y no debe ser utilizado
+              para preguntas críticas o sensibles. Las respuestas generadas por
+              este modelo no son 100% precisas y pueden contener errores.
+            </p>
             <p>
               A web application made with{" "}
               <img
