@@ -10,7 +10,7 @@ import "./Chat.style.css";
 import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
 import ia from "./../../assets/star-1-svgrepo-com.svg";
-// import Switch from "../Switch/Switch";
+import Switch from "../Switch/Switch";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 
@@ -155,7 +155,7 @@ const Chat = () => {
 
   return (
     <div className="container">
-      {/* <Switch /> */}
+      <Switch />
       <div className="header">
       <h1>Asistente Personal</h1>
       <img src={ia} width="100" alt="avatar" />
@@ -177,7 +177,7 @@ const Chat = () => {
                   src={role === "model"  ? ia : imgProfile}
                   width="30"
                   alt="avatar"
-                  style={{ borderRadius: "50%" }}
+                  style={{ borderRadius: "50%", backgroundColor:  "#f0f0f0"}}
                 />
               </div>
               <div className="chat-message">
