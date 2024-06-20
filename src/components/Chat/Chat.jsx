@@ -158,7 +158,7 @@ const Chat = () => {
       <Switch />
       <div className="header">
       <h1>Asistente Personal</h1>
-      <img src={ia} width="100" alt="avatar" />
+      <img src={ia} width="100" alt="avatar"/>
       <p>
         Hola, soy un asistente de desarrollo de software experto en JavaScript y
         ECMAScript 6. Estoy aquí para ayudarte con tus dudas y preguntas sobre
