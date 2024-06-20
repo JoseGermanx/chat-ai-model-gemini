@@ -10,7 +10,7 @@ import "./Chat.style.css";
 import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
 import ia from "./../../assets/star-1-svgrepo-com.svg";
-import Switch from "../Switch/Switch";
+// import Switch from "../Switch/Switch";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 
