@@ -170,7 +170,6 @@ const Chat = () => {
       <div className="chat-container">
         {chatHistory &&
           chatHistory?.map(({ parts, role }, index) => (
-            console.log(parts),
             <div key={index} className={`chat-response ${role}`}>
               <div className="role">
                 <img
