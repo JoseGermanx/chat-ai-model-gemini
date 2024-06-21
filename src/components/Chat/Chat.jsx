@@ -160,7 +160,7 @@ const Chat = () => {
       <img src={ia} width="100" alt="avatar"/>
       <p>
         Hola, soy un asistente de desarrollo de software experto en JavaScript y
-        ECMAScript 6. Estoy aquí para ayudarte con tus dudas y preguntas sobre
+        ECMAScript. Estoy aquí para ayudarte con tus dudas y preguntas sobre
         JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
         continuación y te responderé lo mejor que pueda.
       </p>
