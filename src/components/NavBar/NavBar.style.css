@@ -1,11 +1,15 @@
 .navbar {
   /* border-bottom: 1px solid #e9ecef; */
   top: 0;
+  position: fixed;
   padding: 0.5rem 1rem;
   max-width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: var(--background);
+  width: 100%;
+  z-index: 1001;
 }
 
 .profile {
@@ -65,4 +69,14 @@
 
 .btn-login-logout > span {
   margin-right: 5px;
+}
+
+.login-button {
+  margin-right: 50px;
+}
+
+@media (max-width: 768px) {
+  .login-button {
+    margin-right: 20px;
+  }
 }

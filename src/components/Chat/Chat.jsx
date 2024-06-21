@@ -155,7 +155,7 @@ const Chat = () => {
 
   return (
     <div className="container">
-      <Switch />
+     
       <div className="header">
       <h1>Asistente Personal</h1>
       <img src={ia} width="100" alt="avatar"/>

@@ -155,6 +155,10 @@ input[type="text"] {
     font-size: 8px;
   }
 
+  .chat-message > p  {
+    max-width: 100%;
+  }
+
   .role {
     padding: 0;
     margin-top: 1em;
@@ -235,3 +239,7 @@ pre {
     padding: 20px;
     border-radius: 10px;
   } 
+
+  .chat-message > p > li {
+    font-size: 2em;
+  }

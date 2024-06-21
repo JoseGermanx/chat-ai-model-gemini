@@ -4,6 +4,7 @@ import google from "./../../assets/google-icon-logo-svgrepo-com.svg";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Switch from "../Switch/Switch";
 
 const NavBar = () => {
   const [user, setUser] = useState([]);
@@ -67,6 +68,7 @@ const NavBar = () => {
       <div className="logo">
         <img src={ia} width="50"></img>
       </div>
+      <Switch />
       <div className="login-button">
         {" "}
         {profile && profile.length !== 0 ? (
