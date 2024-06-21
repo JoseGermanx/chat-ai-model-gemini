@@ -209,6 +209,9 @@ pre {
   margin-right: 1em;
   max-width: 100%;
 }
+.chat-message > p > li {
+  font-size: 1em;
+}
 }
 
 .footer {
