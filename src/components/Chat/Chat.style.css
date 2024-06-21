@@ -197,6 +197,14 @@ input[type="text"] {
   flex-direction: column;
   margin-top: 20px;
 }
+
+pre {
+  font-size: 1.6em;
+  padding: 10px;
+  border-radius: 5;
+  margin-right: 1em;
+  max-width: 100%;
+}
 }
 
 .footer {
@@ -220,10 +228,10 @@ input[type="text"] {
     margin-bottom: 2px;
   }
 
-  pre {
-    font-size: 0.8em;
+ pre {
+    font-size: 1em;
     background-color: var(--accent);
     color: var(--imput-text-color);
     padding: 20px;
     border-radius: 10px;
-  }
+  } 
