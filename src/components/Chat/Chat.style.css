@@ -221,7 +221,7 @@ input[type="text"] {
 
   pre {
     font-size: 0.8em;
-    background-color: var(--imput-color);
+    background-color: var(--accent);
     color: var(--imput-text-color);
     padding: 20px;
     border-radius: 10px;
