@@ -201,14 +201,16 @@ input[type="text"] {
 }
 
 pre {
-  font-size: 1.6em;
+  font-size: 1.8em;
   padding: 10px;
   border-radius: 5;
   margin-right: 1em;
   max-width: 100%;
 }
-.chat-message > p > li {
-  font-size: 1em;
+
+div.chat-response > div.chat-message > ul > li > strong {
+  font-size: 1.3em;
+  font-weight:300
 }
 }
 
@@ -243,4 +245,8 @@ pre {
 
   .chat-message > p > li {
     font-size: 2em;
+  }
+  div.chat-response > div.chat-message > ul > li > strong {
+    font-size: 0.9em;
+    font-weight:300
   }
