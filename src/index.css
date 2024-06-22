@@ -42,6 +42,7 @@ h1 {
 p, li {
   font-size: 16px;
   line-height: 1.5;
+  width: 100%;
 }
 
 button {
@@ -70,4 +71,11 @@ pre {
   border-radius: 5;
   margin-right: 1em;
   max-width: 100%;
+}
+
+code {
+  font-weight: 500;
+  font-size: 12px;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
 }

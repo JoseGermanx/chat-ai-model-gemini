@@ -128,11 +128,13 @@ const Chat = () => {
     const response = await result.response;
 
     const text = response.text();
+    console.log(text);
     addMessageToHistory(
       "model",
       text
         // .replace(/\n/g, "<br />")
-        .replace(/"/g, "")
+        // .replace(/```([^```]+)```/g, "<code>$1</code>")
+        // .replace(/"/g, "")
       // .replace(/\*([^*]+)\*/g, "<h3>$1</h3>")
     );
     setMessage("");
