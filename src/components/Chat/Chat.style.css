@@ -83,6 +83,8 @@ div > form.chat-form {
   padding: 10px;
   text-align: justify;
   font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
 }
 
 .role {
@@ -235,12 +237,13 @@ div.chat-response > div.chat-message > ul > li > strong {
     margin-bottom: 2px;
   }
 
- pre {
+ pre  {
     font-size: 1em;
     background-color: var(--accent);
     color: var(--imput-text-color);
     padding: 20px;
     border-radius: 10px;
+    margin-right: 1em;
   } 
 
   .chat-message > p > li {
