@@ -247,6 +247,7 @@ div.chat-response > div.chat-message > ul > li > strong {
     border-radius: 10px;
     margin-right: 1em;
     text-wrap: wrap;
+    justify-content: flex-start;
   } 
 
   .chat-message > p > li {
