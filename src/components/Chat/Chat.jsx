@@ -131,12 +131,7 @@ const Chat = () => {
     console.log(text);
     addMessageToHistory(
       "model",
-      text
-        // .replace(/\n/g, "<br />")
-        // .replace(/```([^```]+)```/g, "<code>$1</code>")
-        // .replace(/"/g, "")
-      // .replace(/\*([^*]+)\*/g, "<h3>$1</h3>")
-    );
+      text);
     setMessage("");
     setLoading(false);
   };
