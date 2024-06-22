@@ -80,16 +80,15 @@ const NavBar = () => {
               src={profile.picture}
               alt="user image"
             />
-            <button className="btn-login-logout" onClick={logOut}>Cerrar sesión</button>
+            
             {/* crear html para un menu dropdown con las opciones de perfil */}
-            {/* <div className="dropdown"  style={{display: display}}>
+            <div className="dropdown"  style={{display: display}}>
               <div className="dropdown-content">
-                <a href="#">Perfil</a>
+                <a href="#" title="En desarrollo">Tus chats</a>
                 <p>{profile.name}</p>
-                <p>Email Address: {profile.email}</p>
-                <button onClick={logOut}>Cerrar sesión</button>
+                <button className="btn-login-logout" onClick={logOut}>Cerrar sesión</button>
               </div>
-            </div>*/}
+            </div>
           </div> 
         ) : (
           <button className="btn-login-logout" onClick={login}><span>Ingresar con Google </span><img src={google} width={20}/></button>
