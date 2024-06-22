@@ -39,7 +39,7 @@ h1 {
   line-height: 1.1;
 }
 
-p {
+p, li {
   font-size: 16px;
   line-height: 1.5;
 }
@@ -62,4 +62,12 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+pre {
+  font-size: 1.2em;
+  padding: 10px;
+  border-radius: 5;
+  margin-right: 1em;
+  max-width: 100%;
 }
