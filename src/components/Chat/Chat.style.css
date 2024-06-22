@@ -245,6 +245,7 @@ div.chat-response > div.chat-message > ul > li > strong {
     padding: 20px;
     border-radius: 10px;
     margin-right: 1em;
+    text-wrap: wrap;
   } 
 
   .chat-message > p > li {
