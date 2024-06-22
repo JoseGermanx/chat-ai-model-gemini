@@ -5,7 +5,7 @@
     --accent: #ecebeb;
     --accent-hover: #cea315; 
     --border: #1f1e1e;
-    --shadow: 7px 15px 13px -4px #00000056;
+    --shadow:  0px 8px 16px 0px rgba(0,0,0,0.2);
     --icon-color: #ffffff;
     --imput-color: #f5f5f5;
     --imput-text-color: #000000;
@@ -18,7 +18,7 @@
     --accent: #484749;
     --accent-hover: #5b4cbe; 
     --border: #696969;
-    --shadow: 7px 15px 13px -4px #ffffff1b;
+    --shadow:  0px 8px 16px 0px rgba(87, 85, 85, 0.2);
     --icon-color: #1f1d1d;
     --imput-color: #25202b;
     --imput-text-color: #ffffff;
