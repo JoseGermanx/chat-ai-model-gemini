@@ -257,3 +257,13 @@ div.chat-response > div.chat-message > ul > li > strong {
     font-size: 0.9em;
     font-weight:300
   }
+
+  /* colocar el botón arriba a la derechar de su contenedor */
+  .copy-button {
+    position: relative;
+    margin-top: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    background-color: var(--background);
+  }

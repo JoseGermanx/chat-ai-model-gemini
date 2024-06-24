@@ -39,6 +39,24 @@ const Chat = () => {
   const [showButton, setShowButton] = useState(false);
   const [imgProfile, setImgProfile] = useState(avatar);
 
+  useEffect(() => {
+    const pres = document.querySelectorAll("pre");
+    pres.forEach((pre) => {
+        const code = pre.querySelector("code");
+        const button = document.createElement("button");
+        button.innerHTML = "Copiar";
+        button.classList.add("copy-button");
+        button.addEventListener("click", () => {
+            navigator.clipboard.writeText(code.innerText);
+        });
+        if (pre.querySelector("button")) {
+            return;
+        }
+        pre.appendChild(button);
+    }
+    );
+  }, [chatHistory])
+
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
     generationConfig,
@@ -148,6 +166,7 @@ const Chat = () => {
   const handleSetMessage = (event) => {
     setMessage(event.target.value);
   };
+
 
   return (
     <div className="container">
