@@ -32,7 +32,9 @@ const generationConfig = {
 
 const Chat = () => {
   const [loading, setLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState(JSON.parse(localStorage.getItem("chatHistory")) || []);
+  const [chatHistory, setChatHistory] = useState(
+    JSON.parse(localStorage.getItem("chatHistory")) || []
+  );
   const bottomRef = useRef(null);
   const [message, setMessage] = useState("");
   const loadingRef = useRef(null);
@@ -42,20 +44,17 @@ const Chat = () => {
   useEffect(() => {
     const pres = document.querySelectorAll("pre");
     pres.forEach((pre) => {
-        const code = pre.querySelector("code");
-        const button = document.createElement("button");
-        button.innerHTML = "Copiar";
-        button.classList.add("copy-button");
-        button.addEventListener("click", () => {
-            navigator.clipboard.writeText(code.innerText);
-        });
-        if (pre.querySelector("button")) {
-            return;
-        }
-        pre.appendChild(button);
-    }
-    );
-  }, [chatHistory])
+      const code = pre.querySelector("code");
+      const button = document.createElement("button");
+      button.innerHTML = "Copiar";
+      button.classList.add("copy-button");
+      button.addEventListener("click", () => {
+        navigator.clipboard.writeText(code.innerText);
+      });
+      if (pre.querySelector("button")) return;
+      pre.appendChild(button);
+    });
+  }, [chatHistory]);
 
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
@@ -69,15 +68,14 @@ const Chat = () => {
   // alamcenar el chatHistory en localStorage
 
   useEffect(() => {
-      localStorage.setItem("chatHistory", JSON.stringify(chatHistory) || []);
-  }, [chatHistory])
+    localStorage.setItem("chatHistory", JSON.stringify(chatHistory) || []);
+  }, [chatHistory]);
 
-  useEffect(()=> {
+  useEffect(() => {
     if (localStorage.getItem("profile")) {
       setImgProfile(JSON.parse(localStorage.getItem("profile")).picture);
     }
-  }, [])
-
+  }, []);
 
   const chat = model.startChat({
     history: [
@@ -108,12 +106,12 @@ const Chat = () => {
 
   const handleShowButton = () => {
     setShowButton(true);
-  }
+  };
 
   const handleDeleteHistory = () => {
     localStorage.removeItem("chatHistory");
     location.reload();
-  }
+  };
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -147,9 +145,7 @@ const Chat = () => {
 
     const text = response.text();
     console.log(text);
-    addMessageToHistory(
-      "model",
-      text);
+    addMessageToHistory("model", text);
     setMessage("");
     setLoading(false);
   };
@@ -167,21 +163,22 @@ const Chat = () => {
     setMessage(event.target.value);
   };
 
-
   return (
     <div className="container">
-     
       <div className="header">
-      <h1>Asistente Personal</h1>
-      <img src={ia} width="100" alt="avatar"/>
-      <p>
-        Hola, soy un asistente de desarrollo de software experto en JavaScript y
-        ECMAScript. Estoy aquí para ayudarte con tus dudas y preguntas sobre
-        JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
-        continuación y te responderé lo mejor que pueda.
-      </p>
-      {chatHistory.length !== 0 ? <button className="delete-history" onClick={handleDeleteHistory}>Eliminar historial del chat</button> : null}
-      
+        <h1>Asistente Personal</h1>
+        <img src={ia} width="100" alt="avatar" />
+        <p>
+          Hola, soy un asistente de desarrollo de software experto en JavaScript
+          y ECMAScript. Estoy aquí para ayudarte con tus dudas y preguntas sobre
+          JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
+          continuación y te responderé lo mejor que pueda.
+        </p>
+        {chatHistory.length !== 0 ? (
+          <button className="delete-history" onClick={handleDeleteHistory}>
+            Eliminar historial del chat
+          </button>
+        ) : null}
       </div>
       <div className="chat-container">
         {chatHistory &&
@@ -189,18 +186,18 @@ const Chat = () => {
             <div key={index} className={`chat-response ${role}`}>
               <div className="role">
                 <img
-                  src={role === "model"  ? ia : imgProfile}
+                  src={role === "model" ? ia : imgProfile}
                   width="30"
                   alt="avatar"
-                  style={{ borderRadius: "50%", backgroundColor:  "#f0f0f0"}}
+                  style={{ borderRadius: "50%", backgroundColor: "#f0f0f0" }}
                 />
               </div>
               <div className="chat-message">
                 <Markdown>{parts}</Markdown>
               </div>
-              <div ref={loadingRef} />
             </div>
           ))}
+        <div ref={loadingRef} />
       </div>
       {loading && <Loading />}
       <div ref={bottomRef} />
@@ -213,12 +210,12 @@ const Chat = () => {
             placeholder="Ingresa tu instrucción aquí..."
             onFocus={handleShowButton}
             type="text"
-          />{
-            showButton && <button className="chat-form-button" type="submit">
-            <img src={arrow} width="20" alt="arrow" />
-          </button>
-          }
-          
+          />
+          {showButton && (
+            <button className="chat-form-button" type="submit">
+              <img src={arrow} width="20" alt="arrow" />
+            </button>
+          )}
         </form>
         <div>
           <div className="footer-text">
