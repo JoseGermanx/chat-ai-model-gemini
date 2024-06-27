@@ -2,12 +2,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 2rem;
+    /* gap: 2rem; */
 }
 
 /* The switch - the box around the slider */
 .switch {
-    font-size: 17px;
+    font-size: 13px;
     position: relative;
     display: inline-block;
     width: 3.5em;
