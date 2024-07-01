@@ -10,7 +10,7 @@
     font-size: 13px;
     position: relative;
     display: inline-block;
-    width: 3.5em;
+    width: 5em;
     height: 2em;
 }
 
@@ -33,6 +33,10 @@
     transition: .4s;
     border-radius: 30px;
     outline: 1px solid var(--border);
+    background-image: var(--bg-img-toggle);
+    background-size: 1.2em;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .slider:before {
@@ -53,5 +57,5 @@ input:checked+.slider {
 
 
 input:checked+.slider:before {
-    transform: translateX(1.5em);
+    transform: translateX(3em);
 }
