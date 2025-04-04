@@ -11,6 +11,7 @@ import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
 import ia from "./../../assets/star-1-svgrepo-com.svg";
 
+
 const apiKey = import.meta.env.VITE_API_KEY;
 
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -57,7 +58,7 @@ const Chat = () => {
   }, [chatHistory]);
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-pro",
+    model: "gemini-2.0-flash",
     generationConfig,
     safetySettings,
   });
