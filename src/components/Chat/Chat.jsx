@@ -167,7 +167,8 @@ const Chat = () => {
   return (
     <div className="container">
       <div className="header">
-        <h1>Asistente Personal</h1>
+        <h1>Asistente IA de JavaScript</h1>
+        <h2>La potencia de la inteligencia artificial para ayudarte a estudiar</h2>
         <img src={ia} width="100" alt="avatar" />
         <p>
           Hola, soy un asistente de desarrollo de software experto en JavaScript
