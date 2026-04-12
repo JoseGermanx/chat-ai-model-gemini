@@ -1,5 +1,5 @@
 import "./NavBar.style.css";
-import ia from"./../../assets/star-1-svgrepo-com.svg";
+import ia from "./../../assets/star-1-svgrepo-com.svg";
 import google from "./../../assets/google-icon-logo-svgrepo-com.svg";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
@@ -12,12 +12,8 @@ const NavBar = () => {
   const [display, setDisplay] = useState("none");
 
   const showDropdown = () => {
-    if (display === "none") {
-      setDisplay("block");
-    } else {
-      setDisplay("none");
-    }
-  }
+    setDisplay(prev => prev === "none" ? "flex" : "none");
+  };
 
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => setUser(codeResponse),
@@ -25,76 +21,80 @@ const NavBar = () => {
   });
 
   useEffect(() => {
-    if (user) {
+    if (user && user.access_token) {
       axios
-        .get(
-          `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`,
-          {
-            headers: {
-              Authorization: `Bearer ${user.access_token}`,
-              Accept: "application/json",
-            },
-          }
-        )
+        .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
+          headers: {
+            Authorization: `Bearer ${user.access_token}`,
+            Accept: "application/json",
+          },
+        })
         .then((res) => {
           setProfile(res.data);
           localStorage.setItem("profile", JSON.stringify(res.data));
-          window.location.reload()
+          window.location.reload();
         })
         .catch((err) => console.log(err));
     }
   }, [user]);
 
-  // log out function to log the user out of google and set the profile array to null
   const logOut = () => {
     googleLogout();
     setProfile(null);
     localStorage.removeItem("profile");
-    window.location.reload()
+    window.location.reload();
   };
 
   useEffect(() => {
-    document.addEventListener("click", (e) => {
-      if (e.target.className !== "img-profile" && e.target.className !== "dropdown-content" && e.target.className !== "profile" && e.target.className !== "dropdown" ) {
+    const handler = (e) => {
+      if (!e.target.closest(".profile")) {
         setDisplay("none");
       }
-    });
-    }, []);
-
-
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, []);
 
   return (
-    <div className="navbar">
-      <div className="logo">
-        <img src={ia} width="50"></img>
+    <nav className="navbar">
+      <div className="navbar-brand">
+        <div className="navbar-brand-icon">
+          <img src={ia} alt="JS AI" />
+        </div>
+        <span className="navbar-brand-name">JS Assistant</span>
       </div>
-      <Switch />
-      <div className="login-button">
-        {" "}
-        {profile && profile.length !== 0 ? (
-          <div className="profile"
-            onClick={showDropdown}
-          >
-            <img
-              className="img-profile"
-              src={profile.picture}
-              alt="user image"
-            />
-            
-            {/* crear html para un menu dropdown con las opciones de perfil */}
-            <div className="dropdown"  style={{display: display}}>
-              <div className="dropdown-content">
-                <a href="#" title="En desarrollo">Tus chats</a>
-                <p>{profile.name}</p>
-                <button className="btn-login-logout" onClick={logOut}>Cerrar sesión</button>
+
+      <div className="navbar-actions">
+        <Switch />
+        <div className="login-area">
+          {profile && profile.length !== 0 ? (
+            <div className="profile" onClick={showDropdown}>
+              <img className="img-profile" src={profile.picture} alt="usuario" />
+              <div className="dropdown" style={{ display }}>
+                <div className="dropdown-content">
+                  <div className="dropdown-user">
+                    <img src={profile.picture} width={36} height={36} alt="" className="dropdown-avatar" />
+                    <div>
+                      <p className="dropdown-name">{profile.name}</p>
+                      <p className="dropdown-email">{profile.email}</p>
+                    </div>
+                  </div>
+                  <div className="dropdown-divider" />
+                  <a href="#" className="dropdown-item" title="En desarrollo">Tus chats</a>
+                  <div className="dropdown-divider" />
+                  <button className="dropdown-logout" onClick={logOut}>Cerrar sesión</button>
+                </div>
               </div>
             </div>
-          </div> 
-        ) : (
-          <button className="btn-login-logout" onClick={login}><span>Ingresar con Google </span><img src={google} width={20}/></button>
-        )}
+          ) : (
+            <button className="btn-google-login" onClick={login}>
+              <img src={google} width={15} height={15} alt="Google" />
+              <span>Ingresar</span>
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </nav>
   );
 };
 

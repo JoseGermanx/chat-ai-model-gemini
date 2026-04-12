@@ -1,16 +1,20 @@
-
 import { useEffect, useState } from 'react';
 
+export const useTheme = () => {
+  const stored = localStorage.getItem('preferredDarkMode');
+  const [theme, setTheme] = useState(stored === 'true' ? 'dark' : 'light');
 
-export const useTheme = (initialTheme) => {
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('preferredDarkMode', String(next === 'dark'));
+      return next;
+    });
+  };
 
-    const [theme, setTheme] = useState(initialTheme)
+  useEffect(() => {
+    document.body.setAttribute('data-theme', theme);
+  }, [theme]);
 
-    const handleChange = (e) => setTheme(e.target.checked ? 'dark' : 'light')
-
-    useEffect(() => {
-        document.body.setAttribute('data-theme', theme);
-    }, [theme])
-
-    return [theme, handleChange]
-}
+  return [theme, toggleTheme];
+};

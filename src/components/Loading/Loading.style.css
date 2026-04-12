@@ -1,37 +1,64 @@
-/* HTML: <div class="loader"></div> */
-.loader {
-  margin-left: 75px;
-  width: 30px;
-  aspect-ratio: 1;
-  display: grid;
-  border-radius: 50%;
-  background:
-    linear-gradient(0deg ,rgb(0 0 0/50%) 30%,#0000 0 70%,rgb(0 0 0/100%) 0) 50%/8% 100%,
-    linear-gradient(90deg,rgb(0 0 0/25%) 30%,#0000 0 70%,rgb(0 0 0/75% ) 0) 50%/100% 8%;
-  background-repeat: no-repeat;
-  animation: l23 1s infinite steps(12);
-  margin-bottom: 150px;
-}
-.loader::before,
-.loader::after {
-   content: "";
-   grid-area: 1/1;
-   border-radius: 50%;
-   background: inherit;
-   opacity: 0.915;
-   transform: rotate(30deg);
-}
-.loader::after {
-   opacity: 0.83;
-   transform: rotate(60deg);
-}
-@keyframes l23 {
-  100% {transform: rotate(1turn)}
+@import url('../../styles/vars.css');
+
+.typing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: var(--max-content);
+  margin: 0 auto;
+  width: 100%;
+  padding: 4px 20px 20px;
+  animation: typing-fade-in 0.3s ease-out;
 }
 
-@media (max-width: 768px) {
-  .loader {
-    margin-left: 20px;
-    margin-bottom: 160px;
-  }
+@keyframes typing-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.typing-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.typing-avatar-dot {
+  width: 13px;
+  height: 13px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: block;
+}
+
+.typing-bubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 13px 16px;
+  border-radius: 18px 18px 18px 4px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  display: inline-block;
+  animation: dot-bounce 1.35s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.17s; }
+.dot:nth-child(3) { animation-delay: 0.34s; }
+
+@keyframes dot-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }

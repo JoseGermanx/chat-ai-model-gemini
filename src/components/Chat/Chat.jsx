@@ -11,9 +11,7 @@ import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
 import ia from "./../../assets/star-1-svgrepo-com.svg";
 
-
 const apiKey = import.meta.env.VITE_API_KEY;
-
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const safetySettings = [
@@ -31,42 +29,51 @@ const generationConfig = {
   topK: 16,
 };
 
+const PROMPT_CHIPS = [
+  "¿Qué son las Promises en JS?",
+  "¿Cómo funciona el event loop?",
+  "Explícame arrow functions",
+  "¿Qué es async/await?",
+];
+
 const Chat = () => {
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState(
     JSON.parse(localStorage.getItem("chatHistory")) || []
   );
   const bottomRef = useRef(null);
-  const [message, setMessage] = useState("");
   const loadingRef = useRef(null);
-  const [showButton, setShowButton] = useState(false);
+  const textareaRef = useRef(null);
+  const [message, setMessage] = useState("");
   const [imgProfile, setImgProfile] = useState(avatar);
 
+  // Inject copy buttons into code blocks
   useEffect(() => {
     const pres = document.querySelectorAll("pre");
     pres.forEach((pre) => {
+      if (pre.querySelector(".copy-button")) return;
       const code = pre.querySelector("code");
+      if (!code) return;
       const button = document.createElement("button");
-      button.innerHTML = "Copiar";
+      button.textContent = "Copiar";
       button.classList.add("copy-button");
       button.addEventListener("click", () => {
         navigator.clipboard.writeText(code.innerText);
+        button.textContent = "¡Copiado!";
+        setTimeout(() => { button.textContent = "Copiar"; }, 1500);
       });
-      if (pre.querySelector("button")) return;
       pre.appendChild(button);
     });
   }, [chatHistory]);
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     generationConfig,
     safetySettings,
   });
 
   const dia = new Date();
   const hora = dia.getHours();
-
-  // alamcenar el chatHistory en localStorage
 
   useEffect(() => {
     localStorage.setItem("chatHistory", JSON.stringify(chatHistory) || []);
@@ -105,10 +112,6 @@ const Chat = () => {
     ],
   });
 
-  const handleShowButton = () => {
-    setShowButton(true);
-  };
-
   const handleDeleteHistory = () => {
     localStorage.removeItem("chatHistory");
     location.reload();
@@ -123,128 +126,158 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    if (!loading) {
-      scrollToBottom();
-    }
+    if (!loading) scrollToBottom();
   }, [loading]);
 
   useEffect(() => {
-    if (loading) {
-      scrollToLoading();
-    }
+    if (loading) scrollToLoading();
   }, [loading]);
 
   const addMessageToHistory = (role, message) => {
-    setChatHistory((prevHistory) => [...prevHistory, { role, parts: message }]);
+    setChatHistory((prev) => [...prev, { role, parts: message }]);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (text) => {
     setLoading(true);
-    addMessageToHistory("user", message);
-    const result = await chat.sendMessage(message);
+    addMessageToHistory("user", text);
+    const result = await chat.sendMessage(text);
     const response = await result.response;
-
-    const text = response.text();
-    console.log(text);
-    addMessageToHistory("model", text);
-    setMessage("");
+    addMessageToHistory("model", response.text());
     setLoading(false);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!message) {
-      return;
-    }
-    fetchData();
+    const trimmed = message.trim();
+    if (!trimmed || loading) return;
     setMessage("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+    fetchData(trimmed);
   };
 
   const handleSetMessage = (event) => {
     setMessage(event.target.value);
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 160) + "px";
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  const handleChipClick = (text) => {
+    setMessage(text);
+    textareaRef.current?.focus();
   };
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1>Asistente IA de JavaScript</h1>
-        <h2>La potencia de la inteligencia artificial para ayudarte a estudiar</h2>
-        <img src={ia} width="100" alt="avatar" />
-        <p>
-          Hola, soy un asistente de desarrollo de software experto en JavaScript
-          y ECMAScript. Estoy aquí para ayudarte con tus dudas y preguntas sobre
-          JavaScript. Por favor, introduce tu pregunta en el cuadro de texto a
-          continuación y te responderé lo mejor que pueda.
-        </p>
-        {chatHistory.length !== 0 ? (
-          <button className="delete-history" onClick={handleDeleteHistory}>
-            Eliminar historial del chat
+    <div className="chat-page">
+
+      {/* ── Welcome state (empty history) ── */}
+      {chatHistory.length === 0 && (
+        <div className="welcome-state">
+          <div className="welcome-icon-wrap">
+            <img src={ia} className="welcome-icon" alt="JS AI" />
+          </div>
+          <h1 className="welcome-title">Asistente IA de JavaScript</h1>
+          <p className="welcome-subtitle">
+            Especializado en JavaScript y ECMAScript 6. Pregúntame sobre código,
+            patrones, o cualquier concepto.
+          </p>
+          <div className="prompt-chips">
+            {PROMPT_CHIPS.map((chip) => (
+              <button key={chip} className="chip" onClick={() => handleChipClick(chip)}>
+                {chip}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Clear history button ── */}
+      {chatHistory.length > 0 && (
+        <div className="chat-actions">
+          <button className="clear-btn" onClick={handleDeleteHistory}>
+            Limpiar chat
           </button>
-        ) : null}
-      </div>
-      <div className="chat-container">
-        {chatHistory &&
-          chatHistory?.map(({ parts, role }, index) => (
-            <div key={index} className={`chat-response ${role}`}>
-              <div className="role">
-                <img
-                  src={role === "model" ? ia : imgProfile}
-                  width="30"
-                  alt="avatar"
-                  style={{ borderRadius: "50%", backgroundColor: "#f0f0f0" }}
-                />
+        </div>
+      )}
+
+      {/* ── Messages ── */}
+      <div className="messages-list">
+        {chatHistory.map(({ parts, role }, index) => (
+          <div key={index} className={`message-row ${role}`}>
+            {role === "model" && (
+              <div className="msg-avatar ai-avatar">
+                <img src={ia} alt="AI" />
               </div>
-              <div className="chat-message">
-                <Markdown>{parts}</Markdown>
-              </div>
+            )}
+            <div className={role === "user" ? "user-bubble" : "ai-content"}>
+              <Markdown>{parts}</Markdown>
             </div>
-          ))}
+            {role === "user" && (
+              <div className="msg-avatar user-avatar-icon">
+                <img src={imgProfile} alt="usuario" />
+              </div>
+            )}
+          </div>
+        ))}
         <div ref={loadingRef} />
       </div>
+
       {loading && <Loading />}
       <div ref={bottomRef} />
-      <div className="footer">
-        <form className="chat-form" onSubmit={handleSubmit}>
-          <input
-            className="chat-form-text "
-            value={message}
-            onChange={handleSetMessage}
-            placeholder="Ingresa tu instrucción aquí..."
-            onFocus={handleShowButton}
-            type="text"
-          />
-          {showButton && (
-            <button className="chat-form-button" type="submit">
-              <img src={arrow} width="20" alt="arrow" />
+
+      {/* ── Input area ── */}
+      <div className="input-area">
+        <form className="input-form" onSubmit={handleSubmit}>
+          <div className="input-wrapper">
+            <textarea
+              ref={textareaRef}
+              className="msg-input"
+              value={message}
+              onChange={handleSetMessage}
+              onKeyDown={handleKeyDown}
+              placeholder="Pregunta algo sobre JavaScript…"
+              rows={1}
+              disabled={loading}
+            />
+            <button
+              className="send-btn"
+              type="submit"
+              disabled={!message.trim() || loading}
+              aria-label="Enviar"
+            >
+              <img src={arrow} width={16} alt="enviar" />
             </button>
-          )}
-        </form>
-        <div>
-          <div className="footer-text">
-            {/* <p>
-              Este chat es un proyecto de demostración y no debe ser utilizado
-              para preguntas críticas o sensibles. Las respuestas generadas por
-              este modelo no son 100% precisas y pueden contener errores.
-            </p> */}
-            <p>
-              A web application made with{" "}
-              <img
-                src="https://simpleicons.org/icons/react.svg"
-                alt="Next.js"
-                width={15}
-                height={15}
-                className=""
-              />{" "}
-              by{" "}
-              <a
-                href="https://jgxdev.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                José Germán Martínez
-              </a>
-            </p>
           </div>
+          <p className="input-hint">
+            Enter para enviar&nbsp;&nbsp;·&nbsp;&nbsp;Shift+Enter para nueva línea
+          </p>
+        </form>
+        <div className="footer-attribution">
+          <p>
+            Hecho con{" "}
+            <img
+              src="https://simpleicons.org/icons/react.svg"
+              alt="React"
+              width={13}
+              height={13}
+              style={{ verticalAlign: "middle", opacity: 0.6 }}
+            />{" "}
+            por{" "}
+            <a href="https://jgxdev.com" target="_blank" rel="noopener noreferrer">
+              José Germán Martínez
+            </a>
+          </p>
         </div>
       </div>
     </div>
