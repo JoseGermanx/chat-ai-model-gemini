@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      generationConfig: { maxOutputTokens: 200, temperature: 0.4, topP: 0.1, topK: 16 },
+      generationConfig: { maxOutputTokens: 8192, temperature: 0.4, topP: 0.1, topK: 16 },
     });
 
     const chat = model.startChat({
