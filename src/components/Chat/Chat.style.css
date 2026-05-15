@@ -4,11 +4,11 @@
    Page Layout
 ───────────────────────────────────────── */
 .chat-page {
-  min-height: 100vh;
-  padding-top: var(--navbar-height);
-  padding-bottom: 130px;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
 }
 
 /* ─────────────────────────────────────────
@@ -21,10 +21,11 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 72px 24px 40px;
+  padding: 40px 24px;
   max-width: var(--max-content);
   margin: 0 auto;
   width: 100%;
+  overflow-y: auto;
 }
 
 .welcome-icon-wrap {
@@ -136,6 +137,9 @@
    Messages
 ───────────────────────────────────────── */
 .messages-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
   max-width: var(--max-content);
   margin: 0 auto;
   width: 100%;
@@ -275,13 +279,9 @@
    Input Area
 ───────────────────────────────────────── */
 .input-area {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
   padding: 10px 20px 18px;
   background: linear-gradient(to bottom, transparent, var(--bg) 35%);
-  z-index: 100;
 }
 
 .input-form {

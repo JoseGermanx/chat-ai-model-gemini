@@ -16,6 +16,7 @@ export function AppProvider({ children }) {
   );
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const loadChats = useCallback(async (profileId) => {
     const data = await getChatsByProfileId(profileId);
@@ -72,6 +73,8 @@ export function AppProvider({ children }) {
         handleDeleteChat,
         updateChatTitleInList,
         refreshChatTimestamp,
+        sidebarOpen,
+        setSidebarOpen,
       }}
     >
       {children}

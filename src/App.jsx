@@ -6,12 +6,12 @@ import { useApp } from "./context/AppContext";
 import "./App.css";
 
 function AppLayout() {
-  const { googleProfile } = useApp();
+  const { googleProfile, sidebarOpen } = useApp();
 
   return (
     <div className="app-shell">
       {googleProfile && <Sidebar />}
-      <div className="app-main">
+      <div className={`app-main ${googleProfile && sidebarOpen ? "" : "sidebar-hidden"}`}>
         <NavBar />
         <Chat />
       </div>

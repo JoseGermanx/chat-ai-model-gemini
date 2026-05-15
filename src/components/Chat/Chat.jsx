@@ -153,7 +153,7 @@ const Chat = () => {
     if (loading) loadingRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [loading]);
 
-  const fetchData = async (text) => {
+  const fetchData = async (text, chatId) => {
     setLoading(true);
     const userEntry = { role: "user", parts: text };
     const newHistory = [...chatHistory, userEntry];
@@ -166,17 +166,15 @@ const Chat = () => {
     const finalHistory = [...newHistory, modelEntry];
     setChatHistory(finalHistory);
 
-    if (activeChatId) {
-      await updateChatHistory(activeChatId, finalHistory);
-      refreshChatTimestamp(activeChatId);
+    await updateChatHistory(chatId, finalHistory);
+    refreshChatTimestamp(chatId);
 
-      if (!titleGeneratedRef.current) {
-        titleGeneratedRef.current = true;
-        const title = await generateTitle(text);
-        if (title) {
-          await updateChatTitle(activeChatId, title);
-          updateChatTitleInList(activeChatId, title);
-        }
+    if (!titleGeneratedRef.current) {
+      titleGeneratedRef.current = true;
+      const title = await generateTitle(text);
+      if (title) {
+        await updateChatTitle(chatId, title);
+        updateChatTitleInList(chatId, title);
       }
     }
 
@@ -197,7 +195,7 @@ const Chat = () => {
 
     setMessage("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
-    fetchData(trimmed);
+    fetchData(trimmed, chatId);
   };
 
   const handleSetMessage = (event) => {

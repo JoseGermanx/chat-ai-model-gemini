@@ -14,6 +14,8 @@ const NavBar = () => {
     setSupabaseProfile,
     loadChats,
     setActiveChatId,
+    sidebarOpen,
+    setSidebarOpen,
   } = useApp();
 
   const [tokenInfo, setTokenInfo] = useState(null);
@@ -78,7 +80,18 @@ const NavBar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand" />
+      <div className="navbar-left">
+        {googleProfile && (
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen((o) => !o)}
+            aria-label={sidebarOpen ? "Ocultar sidebar" : "Mostrar sidebar"}
+            title={sidebarOpen ? "Ocultar sidebar" : "Mostrar sidebar"}
+          >
+            <span className={`toggle-icon ${sidebarOpen ? "open" : ""}`}>&#9776;</span>
+          </button>
+        )}
+      </div>
 
       <div className="navbar-actions">
         <Switch />

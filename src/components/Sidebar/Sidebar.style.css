@@ -7,6 +7,15 @@
   background-color: var(--sidebar-bg, var(--bg-secondary, #f7f7f8));
   border-right: 1px solid var(--border, rgba(0, 0, 0, 0.08));
   overflow: hidden;
+  transition: width 0.25s ease, min-width 0.25s ease, opacity 0.2s ease;
+}
+
+.sidebar.sidebar-collapsed {
+  width: 0;
+  min-width: 0;
+  border-right: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .sidebar-header {

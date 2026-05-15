@@ -9,6 +9,7 @@ const Sidebar = () => {
     setActiveChatId,
     handleNewChat,
     handleDeleteChat,
+    sidebarOpen,
   } = useApp();
 
   const formatDate = (iso) => {
@@ -17,7 +18,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
       <div className="sidebar-header">
         <div className="sidebar-brand">
           <img src={ia} alt="JS AI" width={18} />
