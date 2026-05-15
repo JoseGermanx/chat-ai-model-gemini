@@ -1,19 +1,19 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
+import { supabase } from "../lib/supabase";
 import {
   getChatsByProfileId,
   createChat,
   deleteChat as deleteChatService,
 } from "../services/chatService";
+import { upsertProfile } from "../services/profileService";
 
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const [supabaseProfile, setSupabaseProfile] = useState(null);
-  const [googleProfile, setGoogleProfile] = useState(
-    () => JSON.parse(localStorage.getItem("profile")) || null
-  );
+  const [googleProfile, setGoogleProfile] = useState(null);
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
@@ -23,6 +23,37 @@ export function AppProvider({ children }) {
     setChats(data);
     return data;
   }, []);
+
+  // Supabase Auth listener — handles initial session and all auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const user = session.user;
+        const meta = user.user_metadata;
+        const fullName = meta.full_name || meta.name || user.email;
+        setGoogleProfile({
+          id: user.id,
+          name: fullName,
+          email: user.email,
+          picture: meta.avatar_url || meta.picture,
+          given_name: fullName.split(" ")[0],
+        });
+        upsertProfile(user)
+          .then((sbProfile) => {
+            setSupabaseProfile(sbProfile);
+            return loadChats(sbProfile.id);
+          })
+          .catch((err) => console.error("Error al cargar perfil:", err));
+      } else {
+        setGoogleProfile(null);
+        setSupabaseProfile(null);
+        setChats([]);
+        setActiveChatId(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [loadChats]);
 
   const handleNewChat = useCallback(async () => {
     if (!supabaseProfile) return;
@@ -57,26 +88,40 @@ export function AppProvider({ children }) {
     );
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      supabaseProfile,
+      setSupabaseProfile,
+      googleProfile,
+      setGoogleProfile,
+      chats,
+      setChats,
+      activeChatId,
+      setActiveChatId,
+      loadChats,
+      handleNewChat,
+      handleDeleteChat,
+      updateChatTitleInList,
+      refreshChatTimestamp,
+      sidebarOpen,
+      setSidebarOpen,
+    }),
+    [
+      supabaseProfile,
+      googleProfile,
+      chats,
+      activeChatId,
+      sidebarOpen,
+      loadChats,
+      handleNewChat,
+      handleDeleteChat,
+      updateChatTitleInList,
+      refreshChatTimestamp,
+    ]
+  );
+
   return (
-    <AppContext.Provider
-      value={{
-        supabaseProfile,
-        setSupabaseProfile,
-        googleProfile,
-        setGoogleProfile,
-        chats,
-        setChats,
-        activeChatId,
-        setActiveChatId,
-        loadChats,
-        handleNewChat,
-        handleDeleteChat,
-        updateChatTitleInList,
-        refreshChatTimestamp,
-        sidebarOpen,
-        setSidebarOpen,
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

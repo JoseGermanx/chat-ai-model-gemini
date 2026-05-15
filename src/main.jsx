@@ -1,13 +1,12 @@
 import ReactDOM from "react-dom/client";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 import App from "./App.jsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <GoogleOAuthProvider
-    clientId="30444366537-haoh1h3adhviq2f339bltvgjf7bu2lre.apps.googleusercontent.com">
+  <ErrorBoundary>
     <App />
     <Analytics />
-  </GoogleOAuthProvider>
+  </ErrorBoundary>
 );

@@ -1,70 +1,34 @@
 import "./NavBar.style.css";
 import google from "./../../assets/google-icon-logo-svgrepo-com.svg";
-import { googleLogout, useGoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Switch from "../Switch/Switch";
 import { useApp } from "../../context/AppContext";
-import { upsertProfile } from "../../services/profileService";
+import { supabase } from "../../lib/supabase";
 
 const NavBar = () => {
   const {
     googleProfile,
-    setGoogleProfile,
-    setSupabaseProfile,
-    loadChats,
     setActiveChatId,
     sidebarOpen,
     setSidebarOpen,
   } = useApp();
 
-  const [tokenInfo, setTokenInfo] = useState(null);
   const [display, setDisplay] = useState("none");
 
   const showDropdown = () => {
     setDisplay((prev) => (prev === "none" ? "flex" : "none"));
   };
 
-  const login = useGoogleLogin({
-    onSuccess: (codeResponse) => setTokenInfo(codeResponse),
-    onError: (error) => console.log("Login Failed:", error),
-  });
-
-  useEffect(() => {
-    if (!tokenInfo?.access_token) return;
-    axios
-      .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo.access_token}`, {
-        headers: { Authorization: `Bearer ${tokenInfo.access_token}`, Accept: "application/json" },
-      })
-      .then(async (res) => {
-        const gProfile = res.data;
-        localStorage.setItem("profile", JSON.stringify(gProfile));
-        setGoogleProfile(gProfile);
-
-        const sbProfile = await upsertProfile(gProfile);
-        setSupabaseProfile(sbProfile);
-
-        await loadChats(sbProfile.id);
-      })
-      .catch((err) => console.log(err));
-  }, [tokenInfo, setGoogleProfile, setSupabaseProfile, loadChats]);
-
-  // On mount: restore supabase profile if google profile already in localStorage
-  useEffect(() => {
-    if (!googleProfile) return;
-    upsertProfile(googleProfile).then(async (sbProfile) => {
-      setSupabaseProfile(sbProfile);
-      await loadChats(sbProfile.id);
+  const login = () => {
+    supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
-  const logOut = () => {
-    googleLogout();
-    setGoogleProfile(null);
-    setSupabaseProfile(null);
+  const logOut = async () => {
+    await supabase.auth.signOut();
     setActiveChatId(null);
-    localStorage.removeItem("profile");
     setDisplay("none");
   };
 

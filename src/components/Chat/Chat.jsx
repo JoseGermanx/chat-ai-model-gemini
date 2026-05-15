@@ -1,35 +1,14 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import {
-  GoogleGenerativeAI,
-  HarmBlockThreshold,
-  HarmCategory,
-} from "@google/generative-ai";
+import { useState, useRef, useEffect } from "react";
+import PropTypes from "prop-types";
 import Markdown from "react-markdown";
 import Loading from "../Loading/Loading";
 import { useApp } from "../../context/AppContext";
+import { supabase } from "../../lib/supabase";
 import { getChatById, updateChatHistory, updateChatTitle } from "../../services/chatService";
 import "./Chat.style.css";
 import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
 import ia from "./../../assets/star-1-svgrepo-com.svg";
-
-const apiKey = import.meta.env.VITE_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
-
-const safetySettings = [
-  {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-  },
-];
-
-const generationConfig = {
-  stopSequences: ["red"],
-  maxOutputTokens: 200,
-  temperature: 0.4,
-  topP: 0.1,
-  topK: 16,
-};
 
 const PROMPT_CHIPS = [
   "¿Qué son las Promises en JS?",
@@ -37,6 +16,35 @@ const PROMPT_CHIPS = [
   "Explícame arrow functions",
   "¿Qué es async/await?",
 ];
+
+// React component for code blocks — avoids DOM mutation and memory leaks
+const PreWithCopy = ({ children }) => {
+  const [copied, setCopied] = useState(false);
+  const preRef = useRef(null);
+
+  const handleCopy = () => {
+    const code = preRef.current?.querySelector("code");
+    if (code) {
+      navigator.clipboard.writeText(code.innerText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  return (
+    <pre ref={preRef} style={{ position: "relative" }}>
+      {children}
+      <button className="copy-button" onClick={handleCopy}>
+        {copied ? "¡Copiado!" : "Copiar"}
+      </button>
+    </pre>
+  );
+};
+
+PreWithCopy.propTypes = { children: PropTypes.node };
+PreWithCopy.defaultProps = { children: null };
+
+const markdownComponents = { pre: PreWithCopy };
 
 const Chat = () => {
   const {
@@ -60,7 +68,6 @@ const Chat = () => {
     if (googleProfile?.picture) setImgProfile(googleProfile.picture);
   }, [googleProfile]);
 
-  // Load chat history when activeChatId changes
   useEffect(() => {
     if (!activeChatId) {
       setChatHistory([]);
@@ -77,74 +84,6 @@ const Chat = () => {
     return () => { cancelled = true; };
   }, [activeChatId]);
 
-  // Inject copy buttons into code blocks
-  useEffect(() => {
-    const pres = document.querySelectorAll("pre");
-    pres.forEach((pre) => {
-      if (pre.querySelector(".copy-button")) return;
-      const code = pre.querySelector("code");
-      if (!code) return;
-      const button = document.createElement("button");
-      button.textContent = "Copiar";
-      button.classList.add("copy-button");
-      button.addEventListener("click", () => {
-        navigator.clipboard.writeText(code.innerText);
-        button.textContent = "¡Copiado!";
-        setTimeout(() => { button.textContent = "Copiar"; }, 1500);
-      });
-      pre.appendChild(button);
-    });
-  }, [chatHistory]);
-
-  const dia = useMemo(() => new Date(), []);
-  const hora = useMemo(() => dia.getHours(), [dia]);
-
-  const buildChat = useCallback((history) => {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig,
-      safetySettings,
-    });
-    return model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [
-            {
-              text:
-                "Eres experto en desarrollo de software y programación, responderás sobre temas de programación pero con un enfoque principalmente en javascript,los estandares de ecmascript y typescript. Te proporciono herramientas para consultar referencias para que encuentres respuestas para las consultas que se te harán. Puedes utilizar tu conocimiento previo y también consultar las referencias para generar tus respuestas: https://tc39.es/, https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/, https://developer.mozilla.org/es/docs/Learn/Getting_started_with_the_web/JavaScript_basics, https://devdocs.io/javascript/, https://www.w3schools.com/js/js_es6.asp, https://stackoverflow.com/questions/tagged/javascript, https://www.typescriptlang.org/docs/. Utiliza leguaje relajado y amable y puedes dar una bienvenida dependiendo de la hora del dia: Buenos días para horas de la mañana, Buenas tardes para horas de la tarde y Buenas noches para horas de la noche, realiza esto siempre en el inicio de una conversación pero no en cada mensaje. Puedes consultar la hora actual y fecha actual acá, día: " +
-                dia +
-                " y hora: " +
-                hora +
-                " para saber que tipo de saludo debes dar. No es necesario que indiques la fuente desde donde consultas la hora y el día. No es necesario que digas en las respuestas que eres un asistente de desarrollo de software experto en javascript y ecmascript, ya que esto ya lo sabemos. Se lo mas claro y preciso posible en tus respuestas. Utiliza un leguaje amigable, con ejemplos y explicaciones claras. No respondas preguntas que no tengan que ver con desarrollo de software o programación, si te preguntan algo que no tenga que ver con esto, simplemente responde que no puedes ayudar con eso. No respondas preguntas que no tengan sentido o sean incoherentes. Si te preguntan algo que no entiendes, simplemente responde que no entiendes la pregunta y pide que la reformulen. No respondas preguntas que sean demasiado amplias o generales, en su lugar pide que se especifique más la pregunta.",
-            },
-          ],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: "Ok cuenta con mi ayuda como desarrollador de software experto para aclarar tus dudas, entregarte información y ayudarte. ¿En qué puedo ayudarte hoy?",
-            },
-          ],
-        },
-        ...history,
-      ],
-    });
-  }, [dia, hora]);
-
-  const generateTitle = useCallback(async (firstUserMessage) => {
-    try {
-      const titleModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const result = await titleModel.generateContent(
-        `Resume en máximo 5 palabras el tema de esta pregunta, solo el título sin comillas ni signos de puntuación al final: "${firstUserMessage}"`
-      );
-      return result.response.text().trim();
-    } catch {
-      return null;
-    }
-  }, []);
-
   useEffect(() => {
     if (!loading) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [loading]);
@@ -155,30 +94,39 @@ const Chat = () => {
 
   const fetchData = async (text, chatId) => {
     setLoading(true);
-    const userEntry = { role: "user", parts: text };
-    const newHistory = [...chatHistory, userEntry];
+    const historySnapshot = chatHistory;
+    const userEntry = { id: crypto.randomUUID(), role: "user", parts: text };
+    const newHistory = [...historySnapshot, userEntry];
     setChatHistory(newHistory);
 
-    const chat = buildChat(chatHistory);
-    const result = await chat.sendMessage(text);
-    const responseText = result.response.text();
-    const modelEntry = { role: "model", parts: responseText };
-    const finalHistory = [...newHistory, modelEntry];
-    setChatHistory(finalHistory);
+    try {
+      const { data, error } = await supabase.functions.invoke("chat", {
+        body: { message: text, history: historySnapshot },
+      });
+      if (error) throw error;
 
-    await updateChatHistory(chatId, finalHistory);
-    refreshChatTimestamp(chatId);
+      const modelEntry = { id: crypto.randomUUID(), role: "model", parts: data.response };
+      const finalHistory = [...newHistory, modelEntry];
+      setChatHistory(finalHistory);
+      await updateChatHistory(chatId, finalHistory);
+      refreshChatTimestamp(chatId);
 
-    if (!titleGeneratedRef.current) {
-      titleGeneratedRef.current = true;
-      const title = await generateTitle(text);
-      if (title) {
-        await updateChatTitle(chatId, title);
-        updateChatTitleInList(chatId, title);
+      if (!titleGeneratedRef.current) {
+        titleGeneratedRef.current = true;
+        const { data: td } = await supabase.functions.invoke("chat", {
+          body: { message: text, mode: "title" },
+        });
+        if (td?.title) {
+          await updateChatTitle(chatId, td.title);
+          updateChatTitleInList(chatId, td.title);
+        }
       }
+    } catch (err) {
+      console.error("Error al enviar mensaje:", err);
+      setChatHistory(historySnapshot);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleSubmit = async (event) => {
@@ -224,7 +172,6 @@ const Chat = () => {
   return (
     <div className="chat-page">
 
-      {/* ── No login state ── */}
       {!isLoggedIn && (
         <div className="welcome-state">
           <div className="welcome-icon-wrap">
@@ -238,7 +185,6 @@ const Chat = () => {
         </div>
       )}
 
-      {/* ── Welcome state (logged in, no active chat) ── */}
       {isLoggedIn && !activeChatId && (
         <div className="welcome-state">
           <div className="welcome-icon-wrap">
@@ -261,18 +207,17 @@ const Chat = () => {
         </div>
       )}
 
-      {/* ── Messages ── */}
       {isLoggedIn && activeChatId && (
         <div className="messages-list">
-          {chatHistory.map(({ parts, role }, index) => (
-            <div key={index} className={`message-row ${role}`}>
+          {chatHistory.map(({ id, parts, role }, index) => (
+            <div key={id || index} className={`message-row ${role}`}>
               {role === "model" && (
                 <div className="msg-avatar ai-avatar">
                   <img src={ia} alt="AI" />
                 </div>
               )}
               <div className={role === "user" ? "user-bubble" : "ai-content"}>
-                <Markdown>{parts}</Markdown>
+                <Markdown components={markdownComponents}>{parts}</Markdown>
               </div>
               {role === "user" && (
                 <div className="msg-avatar user-avatar-icon">
@@ -288,7 +233,6 @@ const Chat = () => {
       {loading && <Loading />}
       <div ref={bottomRef} />
 
-      {/* ── Input area ── */}
       {isLoggedIn && (
         <div className="input-area">
           <form className="input-form" onSubmit={handleSubmit}>

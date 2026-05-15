@@ -1,28 +1,19 @@
 import { supabase } from "../lib/supabase";
 
-export async function upsertProfile(googleProfile) {
-  const { id: google_id, email, name, picture } = googleProfile;
+export async function upsertProfile(authUser) {
+  const { id: user_id, email, user_metadata } = authUser;
+  const name = user_metadata.full_name || user_metadata.name || email;
+  const picture = user_metadata.avatar_url || user_metadata.picture;
 
   const { data, error } = await supabase
     .from("profiles")
     .upsert(
-      { google_id, email, name, picture, updated_at: new Date().toISOString() },
-      { onConflict: "google_id" }
+      { user_id, email, name, picture, updated_at: new Date().toISOString() },
+      { onConflict: "user_id" }
     )
     .select()
     .single();
 
   if (error) throw error;
-  return data;
-}
-
-export async function getProfileByGoogleId(googleId) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("google_id", googleId)
-    .single();
-
-  if (error && error.code !== "PGRST116") throw error;
   return data;
 }
