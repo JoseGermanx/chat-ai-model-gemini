@@ -30,7 +30,7 @@ export function AppProvider({ children }) {
       if (session?.user) {
         const user = session.user;
         const meta = user.user_metadata;
-        const fullName = meta.full_name || meta.name || user.email;
+        const fullName = meta.full_name || meta.name || meta.user_name || user.email;
         setGoogleProfile({
           id: user.id,
           name: fullName,

@@ -204,6 +204,13 @@
   background: rgba(239, 68, 68, 0.08);
 }
 
+/* Login buttons container */
+.login-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Google login button */
 .btn-google-login {
   display: flex;
@@ -228,6 +235,29 @@
   box-shadow: var(--shadow-md);
 }
 
+/* GitHub login button */
+.btn-github-login {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-input);
+  background: #24292f;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-github-login:hover {
+  background: #1a1f24;
+  box-shadow: var(--shadow-md);
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 0 14px;
@@ -235,10 +265,12 @@
   .navbar-brand-name {
     display: none;
   }
-  .btn-google-login span {
+  .btn-google-login span,
+  .btn-github-login span {
     display: none;
   }
-  .btn-google-login {
+  .btn-google-login,
+  .btn-github-login {
     padding: 7px 10px;
   }
 }
