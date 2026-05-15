@@ -44,19 +44,17 @@ const NavBar = () => {
         const sbProfile = await upsertProfile(gProfile);
         setSupabaseProfile(sbProfile);
 
-        const chats = await loadChats(sbProfile.id);
-        if (chats.length > 0) setActiveChatId(chats[0].id);
+        await loadChats(sbProfile.id);
       })
       .catch((err) => console.log(err));
-  }, [tokenInfo, setGoogleProfile, setSupabaseProfile, loadChats, setActiveChatId]);
+  }, [tokenInfo, setGoogleProfile, setSupabaseProfile, loadChats]);
 
   // On mount: restore supabase profile if google profile already in localStorage
   useEffect(() => {
     if (!googleProfile) return;
     upsertProfile(googleProfile).then(async (sbProfile) => {
       setSupabaseProfile(sbProfile);
-      const chats = await loadChats(sbProfile.id);
-      if (chats.length > 0) setActiveChatId(chats[0].id);
+      await loadChats(sbProfile.id);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
