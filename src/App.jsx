@@ -1,13 +1,29 @@
 import Chat from "./components/Chat/Chat";
-import "./App.css";
 import NavBar from "./components/NavBar/NavBar";
+import Sidebar from "./components/Sidebar/Sidebar";
+import { AppProvider } from "./context/AppContext";
+import { useApp } from "./context/AppContext";
+import "./App.css";
+
+function AppLayout() {
+  const { googleProfile } = useApp();
+
+  return (
+    <div className="app-shell">
+      {googleProfile && <Sidebar />}
+      <div className="app-main">
+        <NavBar />
+        <Chat />
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
-    <>
-    <NavBar />
-      <Chat />
-    </>
+    <AppProvider>
+      <AppLayout />
+    </AppProvider>
   );
 }
 

@@ -1,55 +1,76 @@
 import "./NavBar.style.css";
-import ia from "./../../assets/star-1-svgrepo-com.svg";
 import google from "./../../assets/google-icon-logo-svgrepo-com.svg";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Switch from "../Switch/Switch";
+import { useApp } from "../../context/AppContext";
+import { upsertProfile } from "../../services/profileService";
 
 const NavBar = () => {
-  const [user, setUser] = useState([]);
-  const [profile, setProfile] = useState(JSON.parse(localStorage.getItem("profile")) || []);
+  const {
+    googleProfile,
+    setGoogleProfile,
+    setSupabaseProfile,
+    loadChats,
+    setActiveChatId,
+  } = useApp();
+
+  const [tokenInfo, setTokenInfo] = useState(null);
   const [display, setDisplay] = useState("none");
 
   const showDropdown = () => {
-    setDisplay(prev => prev === "none" ? "flex" : "none");
+    setDisplay((prev) => (prev === "none" ? "flex" : "none"));
   };
 
   const login = useGoogleLogin({
-    onSuccess: (codeResponse) => setUser(codeResponse),
+    onSuccess: (codeResponse) => setTokenInfo(codeResponse),
     onError: (error) => console.log("Login Failed:", error),
   });
 
   useEffect(() => {
-    if (user && user.access_token) {
-      axios
-        .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
-          headers: {
-            Authorization: `Bearer ${user.access_token}`,
-            Accept: "application/json",
-          },
-        })
-        .then((res) => {
-          setProfile(res.data);
-          localStorage.setItem("profile", JSON.stringify(res.data));
-          window.location.reload();
-        })
-        .catch((err) => console.log(err));
-    }
-  }, [user]);
+    if (!tokenInfo?.access_token) return;
+    axios
+      .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo.access_token}`, {
+        headers: { Authorization: `Bearer ${tokenInfo.access_token}`, Accept: "application/json" },
+      })
+      .then(async (res) => {
+        const gProfile = res.data;
+        localStorage.setItem("profile", JSON.stringify(gProfile));
+        setGoogleProfile(gProfile);
+
+        const sbProfile = await upsertProfile(gProfile);
+        setSupabaseProfile(sbProfile);
+
+        const chats = await loadChats(sbProfile.id);
+        if (chats.length > 0) setActiveChatId(chats[0].id);
+      })
+      .catch((err) => console.log(err));
+  }, [tokenInfo, setGoogleProfile, setSupabaseProfile, loadChats, setActiveChatId]);
+
+  // On mount: restore supabase profile if google profile already in localStorage
+  useEffect(() => {
+    if (!googleProfile) return;
+    upsertProfile(googleProfile).then(async (sbProfile) => {
+      setSupabaseProfile(sbProfile);
+      const chats = await loadChats(sbProfile.id);
+      if (chats.length > 0) setActiveChatId(chats[0].id);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const logOut = () => {
     googleLogout();
-    setProfile(null);
+    setGoogleProfile(null);
+    setSupabaseProfile(null);
+    setActiveChatId(null);
     localStorage.removeItem("profile");
-    window.location.reload();
+    setDisplay("none");
   };
 
   useEffect(() => {
     const handler = (e) => {
-      if (!e.target.closest(".profile")) {
-        setDisplay("none");
-      }
+      if (!e.target.closest(".profile")) setDisplay("none");
     };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
@@ -57,30 +78,23 @@ const NavBar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">
-        <div className="navbar-brand-icon">
-          <img src={ia} alt="JS AI" />
-        </div>
-        <span className="navbar-brand-name">JS Assistant</span>
-      </div>
+      <div className="navbar-brand" />
 
       <div className="navbar-actions">
         <Switch />
         <div className="login-area">
-          {profile && profile.length !== 0 ? (
+          {googleProfile ? (
             <div className="profile" onClick={showDropdown}>
-              <img className="img-profile" src={profile.picture} alt="usuario" />
+              <img className="img-profile" src={googleProfile.picture} alt="usuario" />
               <div className="dropdown" style={{ display }}>
                 <div className="dropdown-content">
                   <div className="dropdown-user">
-                    <img src={profile.picture} width={36} height={36} alt="" className="dropdown-avatar" />
+                    <img src={googleProfile.picture} width={36} height={36} alt="" className="dropdown-avatar" />
                     <div>
-                      <p className="dropdown-name">{profile.name}</p>
-                      <p className="dropdown-email">{profile.email}</p>
+                      <p className="dropdown-name">{googleProfile.name}</p>
+                      <p className="dropdown-email">{googleProfile.email}</p>
                     </div>
                   </div>
-                  <div className="dropdown-divider" />
-                  <a href="#" className="dropdown-item" title="En desarrollo">Tus chats</a>
                   <div className="dropdown-divider" />
                   <button className="dropdown-logout" onClick={logOut}>Cerrar sesión</button>
                 </div>
