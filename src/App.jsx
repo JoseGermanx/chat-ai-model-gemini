@@ -6,11 +6,14 @@ import { useApp } from "./context/AppContext";
 import "./App.css";
 
 function AppLayout() {
-  const { googleProfile, sidebarOpen } = useApp();
+  const { googleProfile, sidebarOpen, setSidebarOpen } = useApp();
 
   return (
     <div className="app-shell">
       {googleProfile && <Sidebar />}
+      {googleProfile && sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
       <div className={`app-main ${googleProfile && sidebarOpen ? "" : "sidebar-hidden"}`}>
         <NavBar />
         <Chat />

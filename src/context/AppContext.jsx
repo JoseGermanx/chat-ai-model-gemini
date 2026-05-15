@@ -16,7 +16,7 @@ export function AppProvider({ children }) {
   );
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
 
   const loadChats = useCallback(async (profileId) => {
     const data = await getChatsByProfileId(profileId);

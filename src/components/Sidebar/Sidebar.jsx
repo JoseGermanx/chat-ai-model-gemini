@@ -10,7 +10,13 @@ const Sidebar = () => {
     handleNewChat,
     handleDeleteChat,
     sidebarOpen,
+    setSidebarOpen,
   } = useApp();
+
+  const selectChat = (id) => {
+    setActiveChatId(id);
+    if (window.innerWidth <= 768) setSidebarOpen(false);
+  };
 
   const formatDate = (iso) => {
     const d = new Date(iso);
@@ -41,7 +47,7 @@ const Sidebar = () => {
               >
                 <button
                   className="chat-item-btn"
-                  onClick={() => setActiveChatId(chat.id)}
+                  onClick={() => selectChat(chat.id)}
                 >
                   <span className="chat-item-title">{chat.title}</span>
                   <span className="chat-item-date">{formatDate(chat.updated_at)}</span>

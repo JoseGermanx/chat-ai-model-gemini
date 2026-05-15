@@ -175,3 +175,36 @@
   --hover-bg: rgba(255, 255, 255, 0.06);
   --active-chat-bg: rgba(255, 255, 255, 0.1);
 }
+
+/* Mobile: sidebar overlays the chat instead of squeezing it */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 280px;
+    min-width: 280px;
+    z-index: 200;
+    transform: translateX(0);
+    transition: transform 0.25s ease, opacity 0.2s ease;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.18);
+  }
+
+  .sidebar.sidebar-collapsed {
+    width: 280px;
+    min-width: 280px;
+    transform: translateX(-100%);
+    opacity: 1;
+    pointer-events: none;
+    border-right: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  }
+
+  .chat-item:hover .chat-delete-btn {
+    display: none;
+  }
+
+  .chat-item .chat-delete-btn {
+    display: flex;
+  }
+}
