@@ -29,7 +29,7 @@ React 18 + Vite SPA — a JavaScript/ES6 programming assistant powered by Google
 
 - SDK: `@google/generative-ai` — initialized with `import.meta.env.VITE_API_KEY`
 - Model: `gemini-2.5-flash` in multi-turn chat mode
-- Config: `maxOutputTokens: 200`, `temperature: 0.4`, `topP: 0.1`, `topK: 16`
+- Config: `maxOutputTokens: 8192`, `temperature: 0.4`, `topP: 0.1`, `topK: 16`
 - The system prompt (embedded in the first chat message, written in Spanish) scopes the assistant to JS/ES6 topics and references MDN, LenguajeJS, DevDocs, and W3Schools
 
 ### State Management
