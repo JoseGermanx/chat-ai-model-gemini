@@ -1,39 +1,61 @@
 :root {
-  --bg: #F8F8F8;
+  /* Backgrounds — warm cream palette */
+  --bg: #F5F4F0;
   --bg-surface: #FFFFFF;
-  --bg-elevated: #F0F0F0;
-  --bg-input: #EBEBEB;
-  --bg-user-msg: #2563EB;
-  --code-bg: #111827;
-  --code-text: #E5E7EB;
+  --bg-elevated: #ECEAE4;
+  --bg-input: #F0EEE8;
+  --bg-user-msg: #6D28D9;
+  --code-bg: #18161A;
+  --code-text: #EAE6F0;
 
-  --text-primary: #0D0D0D;
-  --text-secondary: #6B7280;
-  --text-muted: #A0A0A0;
+  /* Text */
+  --text-primary: #1A1714;
+  --text-secondary: #6A6560;
+  --text-muted: #A09B94;
   --text-on-accent: #FFFFFF;
 
-  --accent: #2563EB;
-  --accent-hover: #1D4ED8;
-  --accent-glow: rgba(37, 99, 235, 0.18);
-  --accent-light: #EFF6FF;
+  /* Accent — violet */
+  --accent: #7C3AED;
+  --accent-hover: #6D28D9;
+  --accent-glow: rgba(124, 58, 237, 0.14);
+  --accent-light: #F5F3FF;
+  --accent-subtle: rgba(124, 58, 237, 0.07);
 
+  /* Status */
+  --danger: #DC2626;
+  --danger-bg: rgba(220, 38, 38, 0.07);
+  --success: #059669;
+
+  /* Borders & Shadows */
   --border: rgba(0, 0, 0, 0.07);
-  --border-input: rgba(0, 0, 0, 0.13);
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  --border-input: rgba(0, 0, 0, 0.12);
+  --border-strong: rgba(0, 0, 0, 0.16);
 
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.07), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.10), 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.07);
+
+  /* Shape */
+  --radius-xs: 5px;
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 22px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
-  --navbar-height: 60px;
-  --max-content: 740px;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  /* Layout */
+  --navbar-height: 56px;
+  --sidebar-width: 252px;
+  --max-content: 720px;
+
+  /* Typography */
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* Legacy compatibility */
+  /* Legacy — needed by existing SVG toggle logic */
   --background: var(--bg);
   --imput-color: var(--bg-input);
   --imput-text-color: var(--text-primary);
@@ -41,31 +63,39 @@
 }
 
 [data-theme='dark'] {
-  --bg: #0D0D0D;
-  --bg-surface: #141414;
-  --bg-elevated: #1C1C1C;
-  --bg-input: #202020;
-  --bg-user-msg: #2563EB;
-  --code-bg: #0A0A0A;
-  --code-text: #E5E7EB;
+  --bg: #0E0D0B;
+  --bg-surface: #161412;
+  --bg-elevated: #1E1C19;
+  --bg-input: #242220;
+  --bg-user-msg: #6D28D9;
+  --code-bg: #0A0908;
+  --code-text: #EAE6F0;
 
-  --text-primary: #EFEFEF;
-  --text-secondary: #9CA3AF;
-  --text-muted: #6B7280;
+  --text-primary: #F0EDE7;
+  --text-secondary: #8A8480;
+  --text-muted: #585450;
   --text-on-accent: #FFFFFF;
 
-  --accent: #3B82F6;
-  --accent-hover: #60A5FA;
-  --accent-glow: rgba(59, 130, 246, 0.22);
-  --accent-light: #1E3A5F;
+  --accent: #A78BFA;
+  --accent-hover: #C4B5FD;
+  --accent-glow: rgba(167, 139, 250, 0.18);
+  --accent-light: #1C1530;
+  --accent-subtle: rgba(167, 139, 250, 0.08);
+
+  --danger: #F87171;
+  --danger-bg: rgba(248, 113, 113, 0.09);
+  --success: #34D399;
 
   --border: rgba(255, 255, 255, 0.06);
-  --border-input: rgba(255, 255, 255, 0.10);
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.55);
+  --border-input: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.13);
 
-  /* Legacy compatibility */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.65), 0 8px 24px rgba(0, 0, 0, 0.5);
+
   --background: var(--bg);
   --imput-color: var(--bg-input);
   --imput-text-color: var(--text-primary);
