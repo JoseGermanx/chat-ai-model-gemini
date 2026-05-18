@@ -5,44 +5,228 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev       # Start Vite dev server
-npm run build     # Production build
-npm run lint      # ESLint (zero warnings allowed)
+npm run dev       # Start Vite dev server (port 5173)
+npm run build     # Production build → /dist
+npm run lint      # ESLint — zero warnings allowed
 npm run preview   # Preview production build
-node server.js    # Start Socket.io server on port 5000
+
+# Supabase Edge Functions
+supabase functions deploy chat   # Deploy the multi-agent Edge Function
 ```
 
 ## Architecture
 
-React 18 + Vite SPA — a JavaScript/ES6 programming assistant powered by Google Gemini AI.
+React 18 + Vite SPA — a multi-session, multi-agent programming tutor powered by Google Gemini AI and Supabase.
 
-**Entry:** `index.html` → `main.jsx` → `App.jsx` → `NavBar` + `Chat`
+**Entry:** `index.html` → `main.jsx` → `App.jsx` → `AppProvider` → `AppLayout` → `Sidebar` + `NavBar` + `Chat`
 
-### Key Files
+---
 
-- **`src/components/Chat/Chat.jsx`** — Core chat UI. Manages `chatHistory` (persisted to localStorage), sends multi-turn conversations to Gemini, and dynamically injects copy-to-clipboard buttons into code blocks rendered by `react-markdown`.
-- **`src/components/NavBar/NavBar.jsx`** — Google OAuth login/logout, user profile display, and theme toggle.
-- **`src/hooks/useTheme.jsx`** — Light/dark theme via `data-theme` attribute on `document.body`, persisted to localStorage.
-- **`server.js`** — Express + Socket.io server (port 5000). Currently scaffolded but not actively used by the frontend Chat component.
+## Multi-Agent System (ADK Patterns)
 
-### Gemini AI Integration
+The app implements Google ADK-inspired patterns using the Gemini SDK in TypeScript (Deno). There is no external agent framework — the patterns are implemented manually in the Supabase Edge Function.
 
-- SDK: `@google/generative-ai` — initialized with `import.meta.env.VITE_API_KEY`
-- Model: `gemini-2.5-flash` in multi-turn chat mode
-- Config: `maxOutputTokens: 8192`, `temperature: 0.4`, `topP: 0.1`, `topK: 16`
-- The system prompt (embedded in the first chat message, written in Spanish) scopes the assistant to JS/ES6 topics and references MDN, LenguajeJS, DevDocs, and W3Schools
+### Patterns in use
 
-### State Management
+| Pattern | Implementation |
+|---------|----------------|
+| **LLM Orchestrator** | `mode: "route"` — Gemini classifies the query and returns the best `agentId` |
+| **Sequential Chain** | Specialist agent → lightweight Validator agent (only when response contains code blocks) |
+| **Prompt Isolation** | Each agent has its own `systemPrompt`, `temperature`, `topP`, `topK` — no monolithic prompts |
+| **Persistent State** | `agent_id` stored in Supabase `chats` table — each session remembers its tutor |
 
-No external state library. All state is local React (`useState`/`useRef`):
-- `chatHistory` — stored in and rehydrated from `localStorage`
-- `profile` — Google OAuth user info, also persisted to `localStorage`
-- `preferredDarkMode` — theme preference in `localStorage`
+### Agent Registry
 
-### Auth
+Defined in two places that must stay in sync:
+- **Frontend**: `src/config/agents.js` — display info (name, icon, color, specialty tags, systemPrompt, model config)
+- **Backend**: `supabase/functions/chat/index.ts` — `AGENTS` map (systemPrompt + model config only)
 
-`@react-oauth/google` — Google Client ID is hardcoded in `main.jsx`. After login, the user's profile is fetched via Axios from the Google OAuth2 v1 userinfo endpoint using the Bearer token.
+| ID | Name | Domain | temperature |
+|----|------|--------|-------------|
+| `js-core` | Alex | JavaScript ES6+, closures, DOM, array methods | 0.4 |
+| `typescript` | Tyler | TypeScript, types, generics, decorators | 0.3 |
+| `async-js` | Sam | Promises, async/await, Event Loop, Workers | 0.4 |
+| `react` | Maya | React hooks, Context, state, performance | 0.4 |
+| `node-backend` | Noel | Node.js, Express, REST APIs, auth, databases | 0.4 |
+| `algorithms` | Vera | DSA, Big O, recursion, dynamic programming | 0.5 |
 
-### Styling
+Default agent when none is specified: `js-core`.
 
-Component-scoped CSS files alongside each component. Global CSS variables (light/dark palette) live in `src/styles/vars.css`.
+### Edge Function modes (`supabase/functions/chat/index.ts`)
+
+```
+mode === "title"   → Generate a 5-word chat title (single generateContent call)
+mode === "route"   → Orchestrator: classify query → return recommended agentId
+default            → Run specialist agent; if response has code, chain validator agent
+```
+
+The validator agent is **non-fatal**: if it fails (rate limit, timeout), the specialist's response is returned as-is.
+
+---
+
+## File Structure
+
+```
+src/
+├── config/
+│   └── agents.js                   # Agent registry (source of truth for frontend)
+├── context/
+│   └── AppContext.jsx              # Global state: chats, activeChatId, showTutorPicker, auth
+├── hooks/
+│   └── useTheme.jsx                # Light/dark theme, persisted to localStorage
+├── lib/
+│   └── supabase.js                 # Supabase client (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+├── services/
+│   ├── chatService.js              # CRUD for chats table; createChat accepts agentId
+│   └── profileService.js           # upsertProfile — links Google OAuth user to Supabase profile
+├── components/
+│   ├── Chat/Chat.jsx               # Core chat UI; reads agentId from active chat, passes to Edge Function
+│   ├── NavBar/NavBar.jsx           # Google + GitHub OAuth login, theme toggle
+│   ├── Sidebar/Sidebar.jsx         # Chat list with TutorBadge per chat; "+" opens TutorPicker
+│   ├── TutorPicker/
+│   │   ├── TutorPicker.jsx         # Modal: grid of 6 agent cards; calls handleNewChat(agentId)
+│   │   └── TutorPicker.style.css
+│   ├── TutorBadge/
+│   │   └── TutorBadge.jsx          # Small emoji+color indicator for a given agentId
+│   ├── Loading/Loading.jsx
+│   ├── Switch/Switch.jsx           # Theme toggle button
+│   └── ErrorBoundary.jsx
+├── styles/
+│   └── vars.css                    # CSS custom properties — light/dark palette
+└── App.jsx                         # AppLayout: renders Sidebar, NavBar, Chat, TutorPicker modal
+supabase/
+└── functions/
+    └── chat/
+        └── index.ts               # Deno Edge Function: agent routing, specialist execution, validator chain
+```
+
+---
+
+## Key Data Flows
+
+### Creating a new chat
+```
+Sidebar "+" button
+  → setShowTutorPicker(true)           # AppContext
+  → TutorPicker modal renders (App.jsx)
+  → user selects agent card
+  → handleNewChat(agentId)             # AppContext
+  → createChat(profileId, agentId)     # chatService — inserts with agent_id
+  → setActiveChatId(chat.id)
+  → TutorPicker closes
+```
+
+### Sending a message
+```
+Chat.jsx handleSubmit
+  → agentId = chats.find(activeChatId)?.agent_id ?? "js-core"
+  → supabase.functions.invoke("chat", { message, history, agentId })
+  → Edge Function: load agent config → startChat with isolated systemPrompt
+  → specialist response
+  → if response has code blocks → validator agent (non-fatal chain)
+  → return { response, agentId }
+  → updateChatHistory(chatId, finalHistory)   # persist to Supabase
+  → auto-generate title on first message (mode: "title")
+```
+
+### Message format (stored in chats.history JSON array)
+```javascript
+{ id: UUID, role: "user" | "model", parts: string }
+```
+
+---
+
+## Database Schema (Supabase PostgreSQL)
+
+### `profiles`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `user_id` | UUID | Supabase Auth user ID |
+| `email` | text | |
+| `name` | text | |
+| `picture` | text | Avatar URL |
+| `google_id` | text | Links chats across logins |
+| `updated_at` | timestamp | |
+
+### `chats`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `profile_id` | UUID FK | → profiles.id |
+| `title` | text | Auto-generated after first message |
+| `history` | JSONB | Array of `{ id, role, parts }` |
+| `agent_id` | text | DEFAULT `'js-core'` — which tutor this chat uses |
+| `created_at` | timestamp | |
+| `updated_at` | timestamp | Bumped on every message; used for sidebar ordering |
+
+**Required migration** (run once in Supabase SQL Editor):
+```sql
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS agent_id TEXT DEFAULT 'js-core';
+```
+
+RLS is enabled on both tables. All queries run with the user's auth token via the Supabase client.
+
+---
+
+## State Management (AppContext)
+
+No external library. `AppContext.jsx` manages all global state via `useState` + `useMemo`.
+
+| State | Type | Purpose |
+|-------|------|---------|
+| `supabaseProfile` | object | DB profile record |
+| `googleProfile` | object | `{ id, name, email, picture, given_name }` |
+| `chats` | array | `{ id, title, agent_id, created_at, updated_at }` — ordered by `updated_at DESC` |
+| `activeChatId` | string\|null | Currently open chat |
+| `sidebarOpen` | boolean | Mobile sidebar toggle |
+| `showTutorPicker` | boolean | Controls TutorPicker modal visibility |
+
+Key callbacks: `handleNewChat(agentId)`, `handleDeleteChat(chatId)`, `updateChatTitleInList(chatId, title)`, `refreshChatTimestamp(chatId)`.
+
+---
+
+## Auth
+
+Supabase Auth with Google and GitHub OAuth providers. `onAuthStateChange` listener in `AppContext` handles session lifecycle:
+- **Login**: extract `user_metadata` → `upsertProfile()` → `loadChats()`
+- **Logout**: clear all state
+
+`profileService.upsertProfile` links by `google_id` first to preserve existing chats across re-logins.
+
+---
+
+## Gemini AI Integration
+
+- **SDK**: `@google/generative-ai` — server-side only (Deno Edge Function)
+- **Model**: `gemini-2.5-flash` for all modes
+- **Multi-turn**: history sent as `[{ role, parts: [{ text }] }]` with systemPrompt injected as the first exchange
+- **No client-side Gemini calls** — all AI requests go through `supabase.functions.invoke("chat", { body })`
+
+---
+
+## Styling
+
+Component-scoped CSS alongside each component. Global design tokens in `src/styles/vars.css`:
+- Light/dark palette via `[data-theme="dark"]` selector on `document.body`
+- Key variables: `--bg`, `--bg-surface`, `--bg-elevated`, `--accent`, `--border`, `--radius-md`, `--font-sans`, `--font-mono`
+- Agent card colors are injected as CSS custom properties: `--agent-color`, `--agent-color-text`
+
+---
+
+## Environment Variables
+
+| Variable | Used in | Notes |
+|----------|---------|-------|
+| `VITE_SUPABASE_URL` | Frontend | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Frontend | Supabase anonymous key |
+| `GEMINI_API_KEY` | Edge Function | Set in Supabase project secrets |
+
+---
+
+## Adding a New Agent
+
+1. Add entry to `AGENTS` in `src/config/agents.js` (id, name, description, icon, color, colorText, specialty, systemPrompt, temperature, topP, topK, maxOutputTokens)
+2. Mirror the entry (systemPrompt + model config only) in the `AGENTS` map in `supabase/functions/chat/index.ts`
+3. Run `supabase functions deploy chat`
+4. The TutorPicker grid renders automatically from `AGENTS_LIST`
