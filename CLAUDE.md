@@ -27,7 +27,7 @@ supabase functions deploy chat   # Old Supabase Edge Function — superseded by 
 
 React 18 + Vite SPA — a multi-session, multi-agent programming tutor powered by Google Gemini AI and Supabase.
 
-**Entry:** `index.html` → `main.jsx` → `App.jsx` → `AppProvider` → `AppLayout` → `Sidebar` + `NavBar` + `Chat`
+**Entry:** `index.html` → `main.jsx` → `App.jsx` → `AppProvider` → `AppLayout` → `Sidebar` + `NavBar` + `Chat` (or `NotesHistory`)
 
 ---
 
@@ -97,18 +97,23 @@ src/
 ├── config/
 │   └── agents.js                   # Agent registry (source of truth for frontend)
 ├── context/
-│   └── AppContext.jsx              # Global state: chats, activeChatId, showTutorPicker, auth
+│   └── AppContext.jsx              # Global state: chats, activeChatId, notes flags, auth
 ├── hooks/
 │   └── useTheme.jsx                # Light/dark theme, persisted to localStorage
 ├── lib/
 │   └── supabase.js                 # Supabase client (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
 ├── services/
 │   ├── chatService.js              # CRUD for chats table; createChat accepts agentId
+│   ├── notesService.js             # CRUD for notes table (getNotesByChatId, createNote, updateNote, deleteNote)
 │   └── profileService.js           # upsertProfile — links Google OAuth user to Supabase profile
 ├── components/
-│   ├── Chat/Chat.jsx               # Core chat UI; reads agentId from active chat, passes to Edge Function
+│   ├── Chat/Chat.jsx               # Core chat UI; notes toggle button in tutor header
 │   ├── NavBar/NavBar.jsx           # Google + GitHub OAuth login, theme toggle
 │   ├── Sidebar/Sidebar.jsx         # Chat list with TutorBadge per chat; "+" opens TutorPicker
+│   ├── Notes/
+│   │   ├── NotesPanel.jsx          # Slide-in right drawer: create/edit/delete notes per chat
+│   │   ├── NotesHistory.jsx        # Full-page timeline view of all notes for a session
+│   │   └── NotesPanel.style.css    # Styles for both notes components
 │   ├── TutorPicker/
 │   │   ├── TutorPicker.jsx         # Modal: grid of 6 agent cards; calls handleNewChat(agentId)
 │   │   └── TutorPicker.style.css
@@ -119,7 +124,7 @@ src/
 │   └── ErrorBoundary.jsx
 ├── styles/
 │   └── vars.css                    # CSS custom properties — light/dark palette
-└── App.jsx                         # AppLayout: renders Sidebar, NavBar, Chat, TutorPicker modal
+└── App.jsx                         # AppLayout: renders Sidebar, NavBar, Chat/NotesHistory, TutorPicker modal
 supabase/
 └── functions/
     └── chat/
@@ -160,6 +165,22 @@ Chat.jsx handleSubmit
 { id: UUID, role: "user" | "model", parts: string }
 ```
 
+### Saving a note
+```
+Chat tutor header — 📓 button
+  → setShowNotesPanel(true)              # AppContext
+  → NotesPanel renders (Chat.jsx sibling inside chat-page-wrapper)
+  → user types and submits note
+  → createNote(chatId, profileId, content)  # notesService → Supabase INSERT
+  → note prepended to local notes[]
+  → updateNotesCount(chatId, count)      # badge in tutor header updates
+
+NotesPanel "Ver historial completo →"
+  → setShowNotesHistory(true)            # AppContext
+  → App.jsx renders NotesHistory instead of Chat
+  → full timeline view of all notes for the session
+```
+
 ---
 
 ## Database Schema (Supabase PostgreSQL)
@@ -186,12 +207,39 @@ Chat.jsx handleSubmit
 | `created_at` | timestamp | |
 | `updated_at` | timestamp | Bumped on every message; used for sidebar ordering |
 
-**Required migration** (run once in Supabase SQL Editor):
+### `notes`
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | UUID PK | |
+| `chat_id` | UUID FK | → chats.id ON DELETE CASCADE |
+| `profile_id` | UUID FK | → profiles.id ON DELETE CASCADE |
+| `content` | text | Plain text note body |
+| `created_at` | timestamptz | |
+| `updated_at` | timestamptz | Bumped on edit |
+
+**Required migrations** (run once in Supabase SQL Editor):
 ```sql
+-- agent_id column (if not already applied)
 ALTER TABLE chats ADD COLUMN IF NOT EXISTS agent_id TEXT DEFAULT 'js-core';
+
+-- notes table
+CREATE TABLE IF NOT EXISTS notes (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chat_id     UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+  profile_id  UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  content     TEXT NOT NULL DEFAULT '',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS notes_chat_id_idx ON notes(chat_id);
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage their own notes"
+  ON notes FOR ALL
+  USING (profile_id IN (SELECT id FROM profiles WHERE user_id = auth.uid()))
+  WITH CHECK (profile_id IN (SELECT id FROM profiles WHERE user_id = auth.uid()));
 ```
 
-RLS is enabled on both tables. All queries run with the user's auth token via the Supabase client.
+RLS is enabled on all tables. All queries run with the user's auth token via the Supabase client.
 
 ---
 
@@ -207,8 +255,13 @@ No external library. `AppContext.jsx` manages all global state via `useState` + 
 | `activeChatId` | string\|null | Currently open chat |
 | `sidebarOpen` | boolean | Mobile sidebar toggle |
 | `showTutorPicker` | boolean | Controls TutorPicker modal visibility |
+| `showNotesPanel` | boolean | Controls notes drawer (slides in from right in Chat layout) |
+| `showNotesHistory` | boolean | Replaces Chat with NotesHistory full-page view |
+| `notesCountByChat` | object | `{ [chatId]: number }` — drives badge on the 📓 button |
 
-Key callbacks: `handleNewChat(agentId)`, `handleDeleteChat(chatId)`, `updateChatTitleInList(chatId, title)`, `refreshChatTimestamp(chatId)`.
+Key callbacks: `handleNewChat(agentId)`, `handleDeleteChat(chatId)`, `updateChatTitleInList(chatId, title)`, `refreshChatTimestamp(chatId)`, `updateNotesCount(chatId, count)`.
+
+Notes state is reset to closed on logout and on chat deletion.
 
 ---
 
