@@ -106,10 +106,26 @@ const Chat = () => {
     setChatHistory(newHistory);
 
     try {
-      const { data, error } = await supabase.functions.invoke("chat", {
-        body: { message: text, history: historySnapshot, agentId },
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("No auth session");
+
+      const generateTitle = !titleGeneratedRef.current;
+      const res = await fetch(`${import.meta.env.VITE_ADK_URL}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          message: text,
+          history: historySnapshot,
+          agentId,
+          generateTitle,
+        }),
       });
-      if (error) throw error;
+      if (!res.ok) throw new Error(`ADK error ${res.status}`);
+      const data = await res.json();
 
       const modelEntry = { id: crypto.randomUUID(), role: "model", parts: data.response };
       const finalHistory = [...newHistory, modelEntry];
@@ -117,15 +133,10 @@ const Chat = () => {
       await updateChatHistory(chatId, finalHistory);
       refreshChatTimestamp(chatId);
 
-      if (!titleGeneratedRef.current) {
+      if (generateTitle && data.title) {
         titleGeneratedRef.current = true;
-        const { data: td } = await supabase.functions.invoke("chat", {
-          body: { message: text, mode: "title" },
-        });
-        if (td?.title) {
-          await updateChatTitle(chatId, td.title);
-          updateChatTitleInList(chatId, td.title);
-        }
+        await updateChatTitle(chatId, data.title);
+        updateChatTitleInList(chatId, data.title);
       }
     } catch (err) {
       console.error("Error al enviar mensaje:", err);

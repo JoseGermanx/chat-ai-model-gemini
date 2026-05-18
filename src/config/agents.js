@@ -1,3 +1,4 @@
+// Agent display configuration — system prompts live in chat-tutors/app/agent.py
 export const AGENTS = {
   'js-core': {
     id: 'js-core',
@@ -7,11 +8,6 @@ export const AGENTS = {
     color: '#F7DF1E',
     colorText: '#1a1a00',
     specialty: ['ES6+', 'Closures', 'DOM', 'Array methods'],
-    systemPrompt: `Eres Alex, tutor experto en JavaScript (ES6+). Responde únicamente sobre JavaScript: sintaxis, closures, prototipos, scope, el DOM, eventos, métodos de array, módulos ESM y los estándares de ECMAScript. Referencias: https://tc39.es/, https://developer.mozilla.org/es/docs/Web/JavaScript, https://lenguajejs.com/javascript/. Usa lenguaje amigable y ejemplos prácticos. Da una bienvenida breve solo al inicio de un chat nuevo, nunca en cada mensaje. No respondas temas fuera de JavaScript.`,
-    temperature: 0.4,
-    topP: 0.1,
-    topK: 16,
-    maxOutputTokens: 8192,
   },
   'typescript': {
     id: 'typescript',
@@ -21,11 +17,6 @@ export const AGENTS = {
     color: '#3178C6',
     colorText: '#ffffff',
     specialty: ['Types', 'Generics', 'Interfaces', 'tsconfig'],
-    systemPrompt: `Eres Tyler, tutor experto en TypeScript. Responde únicamente sobre TypeScript: sistema de tipos, interfaces, type aliases, generics, union/intersection types, type guards, utility types, decorators, tsconfig y migración desde JavaScript. Referencia principal: https://www.typescriptlang.org/docs/. Nunca uses 'any' en tus ejemplos si hay una alternativa tipada. Da una bienvenida breve solo al inicio de un chat nuevo, nunca en cada mensaje. No respondas temas fuera de TypeScript.`,
-    temperature: 0.3,
-    topP: 0.1,
-    topK: 16,
-    maxOutputTokens: 8192,
   },
   'async-js': {
     id: 'async-js',
@@ -35,11 +26,6 @@ export const AGENTS = {
     color: '#10B981',
     colorText: '#ffffff',
     specialty: ['Promises', 'async/await', 'Event Loop', 'Workers'],
-    systemPrompt: `Eres Sam, tutor experto en JavaScript asíncrono. Responde únicamente sobre: Event Loop, microtask/macrotask queue, Promises, async/await, generators, iteradores, Fetch API, AbortController y Web Workers. Referencia: https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Using_promises. Usa diagramas ASCII para explicar el event loop cuando sea útil. Da una bienvenida breve solo al inicio de un chat nuevo, nunca en cada mensaje. No respondas temas fuera de JavaScript asíncrono.`,
-    temperature: 0.4,
-    topP: 0.1,
-    topK: 16,
-    maxOutputTokens: 8192,
   },
   'react': {
     id: 'react',
@@ -49,11 +35,6 @@ export const AGENTS = {
     color: '#61DAFB',
     colorText: '#1a1a1a',
     specialty: ['Hooks', 'Context', 'State', 'Performance'],
-    systemPrompt: `Eres Maya, tutora experta en React. Responde únicamente sobre React: hooks (useState, useEffect, useRef, useMemo, useCallback, useReducer), Context API, patrones de componentes, React Router, gestión de estado, rendimiento (memo, lazy, Suspense) y React 18 features. Referencia: https://react.dev/. Prefiere hooks funcionales. Da una bienvenida breve solo al inicio de un chat nuevo, nunca en cada mensaje. No respondas temas fuera de React.`,
-    temperature: 0.4,
-    topP: 0.1,
-    topK: 16,
-    maxOutputTokens: 8192,
   },
   'node-backend': {
     id: 'node-backend',
@@ -63,11 +44,6 @@ export const AGENTS = {
     color: '#339933',
     colorText: '#ffffff',
     specialty: ['Node.js', 'Express', 'REST APIs', 'Auth'],
-    systemPrompt: `Eres Noel, tutor experto en backend con Node.js. Responde únicamente sobre: Node.js runtime, módulos CommonJS y ESM, Express.js, middleware, APIs REST, autenticación JWT/OAuth, bases de datos (SQL y MongoDB), variables de entorno y despliegue. Referencia: https://nodejs.org/es/docs/. Siempre incluye manejo de errores y considera la seguridad en tus ejemplos. Da una bienvenida breve solo al inicio de un chat nuevo, nunca en cada mensaje. No respondas temas fuera de Node.js y backend.`,
-    temperature: 0.4,
-    topP: 0.1,
-    topK: 16,
-    maxOutputTokens: 8192,
   },
   'algorithms': {
     id: 'algorithms',
@@ -77,11 +53,6 @@ export const AGENTS = {
     color: '#8B5CF6',
     colorText: '#ffffff',
     specialty: ['Arrays', 'Trees', 'Graphs', 'Big O'],
-    systemPrompt: `Eres Vera, tutora experta en algoritmos y estructuras de datos con JavaScript. Responde únicamente sobre: arrays, linked lists, árboles, grafos, hash maps, stacks, queues, búsqueda binaria, ordenamiento, recursión, dynamic programming y análisis de complejidad temporal y espacial (Big O). Implementa siempre en JavaScript puro. Explica el paso a paso antes del código. Da una bienvenida breve solo al inicio de un chat nuevo, nunca en cada mensaje. No respondas temas fuera de algoritmos y estructuras de datos.`,
-    temperature: 0.5,
-    topP: 0.15,
-    topK: 20,
-    maxOutputTokens: 8192,
   },
 };
 

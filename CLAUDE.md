@@ -5,13 +5,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
+# Frontend
 npm run dev       # Start Vite dev server (port 5173)
 npm run build     # Production build → /dist
 npm run lint      # ESLint — zero warnings allowed
 npm run preview   # Preview production build
 
-# Supabase Edge Functions
-supabase functions deploy chat   # Deploy the multi-agent Edge Function
+# ADK backend (chat-tutors/)
+cd chat-tutors
+agents-cli install                                         # Install Python deps
+uv run uvicorn app.fast_api_app:app --reload --port 8000   # Start dev server
+agents-cli playground                                      # Interactive ADK web UI
+agents-cli lint                                            # Lint Python code
+agents-cli deploy                                          # Deploy to Cloud Run (requires GCP auth)
+
+# Legacy (kept for rollback only)
+supabase functions deploy chat   # Old Supabase Edge Function — superseded by ADK
 ```
 
 ## Architecture
@@ -22,24 +31,31 @@ React 18 + Vite SPA — a multi-session, multi-agent programming tutor powered b
 
 ---
 
-## Multi-Agent System (ADK Patterns)
+## Multi-Agent System (Google ADK)
 
-The app implements Google ADK-inspired patterns using the Gemini SDK in TypeScript (Deno). There is no external agent framework — the patterns are implemented manually in the Supabase Edge Function.
+The backend is a **real Google ADK project** in `chat-tutors/`, replacing the old Supabase Edge Function.
 
-### Patterns in use
+```
+chat-tutors/app/agent.py          # TutorOrchestrator(BaseAgent) + 6 LlmAgent specialists + validator
+chat-tutors/app/fast_api_app.py   # FastAPI: ADK playground + custom POST /chat endpoint
+```
+
+Start the ADK server: `cd chat-tutors && uv run uvicorn app.fast_api_app:app --reload`
+
+### ADK Patterns in use
 
 | Pattern | Implementation |
 |---------|----------------|
-| **LLM Orchestrator** | `mode: "route"` — Gemini classifies the query and returns the best `agentId` |
-| **Sequential Chain** | Specialist agent → lightweight Validator agent (only when response contains code blocks) |
-| **Prompt Isolation** | Each agent has its own `systemPrompt`, `temperature`, `topP`, `topK` — no monolithic prompts |
-| **Persistent State** | `agent_id` stored in Supabase `chats` table — each session remembers its tutor |
+| **BaseAgent router** | `TutorOrchestrator._run_async_impl` reads `agentId` from session state, routes to specialist |
+| **LlmAgent specialists** | 6 `Agent` instances with isolated `instruction`, `generate_content_config`, `before_model_callback` |
+| **History injection** | `inject_history` callback prepends Supabase history into `LlmRequest.contents` before each model call |
+| **Sequential validation** | After specialist runs, `_validate_code()` checks code blocks via direct Gemini call (non-fatal) |
+| **Persistent State** | `agent_id` stored in Supabase `chats` table; passed as `state` on session creation |
 
 ### Agent Registry
 
-Defined in two places that must stay in sync:
-- **Frontend**: `src/config/agents.js` — display info (name, icon, color, specialty tags, systemPrompt, model config)
-- **Backend**: `supabase/functions/chat/index.ts` — `AGENTS` map (systemPrompt + model config only)
+- **Frontend** `src/config/agents.js` — display info ONLY (name, icon, color, specialty). No system prompts.
+- **Backend (canonical)** `chat-tutors/app/agent.py` — `_SYSTEM_PROMPTS` + `_MODEL_CONFIGS` (single source of truth)
 
 | ID | Name | Domain | temperature |
 |----|------|--------|-------------|
@@ -52,15 +68,15 @@ Defined in two places that must stay in sync:
 
 Default agent when none is specified: `js-core`.
 
-### Edge Function modes (`supabase/functions/chat/index.ts`)
+### POST /chat (ADK endpoint)
 
-```
-mode === "title"   → Generate a 5-word chat title (single generateContent call)
-mode === "route"   → Orchestrator: classify query → return recommended agentId
-default            → Run specialist agent; if response has code, chain validator agent
-```
+Request: `{ message, agentId, history[], generateTitle? }`
+Response: `{ response, agentId, title? }`
 
-The validator agent is **non-fatal**: if it fails (rate limit, timeout), the specialist's response is returned as-is.
+- `agentId` is stored in session state → orchestrator routes to the right specialist
+- `history` is injected into `LlmRequest.contents` via `inject_history` callback
+- Validator runs on code blocks (non-fatal — failure returns specialist response as-is)
+- `generateTitle: true` → backend generates title inline and returns it in `title`
 
 ---
 
@@ -198,10 +214,10 @@ Supabase Auth with Google and GitHub OAuth providers. `onAuthStateChange` listen
 
 ## Gemini AI Integration
 
-- **SDK**: `@google/generative-ai` — server-side only (Deno Edge Function)
-- **Model**: `gemini-2.5-flash` for all modes
-- **Multi-turn**: history sent as `[{ role, parts: [{ text }] }]` with systemPrompt injected as the first exchange
-- **No client-side Gemini calls** — all AI requests go through `supabase.functions.invoke("chat", { body })`
+- **SDK**: `google-adk` (Python) + `google-genai` — ADK backend only
+- **Model**: `gemini-2.5-flash` for all modes (specialists + validator + title generation)
+- **Multi-turn**: history from Supabase injected into `LlmRequest.contents` via `inject_history` callback
+- **No client-side AI calls** — all AI requests go through `POST /chat` on the ADK FastAPI server
 
 ---
 
@@ -216,17 +232,29 @@ Component-scoped CSS alongside each component. Global design tokens in `src/styl
 
 ## Environment Variables
 
-| Variable | Used in | Notes |
-|----------|---------|-------|
-| `VITE_SUPABASE_URL` | Frontend | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Frontend | Supabase anonymous key |
-| `GEMINI_API_KEY` | Edge Function | Set in Supabase project secrets |
+### Frontend (`.env`)
+| Variable | Notes |
+|----------|-------|
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `VITE_ADK_URL` | ADK server URL — `http://localhost:8000` for local dev |
+
+### ADK backend (`chat-tutors/.env`)
+| Variable | Notes |
+|----------|-------|
+| `GOOGLE_API_KEY` | Gemini AI Studio key (local dev, `GOOGLE_GENAI_USE_VERTEXAI=False`) |
+| `GOOGLE_GENAI_USE_VERTEXAI` | `True` for Cloud Run / Vertex AI prod |
+| `GOOGLE_CLOUD_PROJECT` | GCP project ID (Vertex AI mode only) |
+| `SUPABASE_URL` | Supabase project URL (JWT validation) |
+| `SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `ALLOW_ORIGINS` | Comma-separated CORS origins |
 
 ---
 
 ## Adding a New Agent
 
-1. Add entry to `AGENTS` in `src/config/agents.js` (id, name, description, icon, color, colorText, specialty, systemPrompt, temperature, topP, topK, maxOutputTokens)
-2. Mirror the entry (systemPrompt + model config only) in the `AGENTS` map in `supabase/functions/chat/index.ts`
-3. Run `supabase functions deploy chat`
-4. The TutorPicker grid renders automatically from `AGENTS_LIST`
+1. Add entry to `_SYSTEM_PROMPTS` and `_MODEL_CONFIGS` in `chat-tutors/app/agent.py`
+2. Add the new ID to `_AGENT_IDS` list in `chat-tutors/app/agent.py`
+3. Add display entry (id, name, icon, color, specialty) to `src/config/agents.js`
+4. Restart the ADK server — no deploy needed for local dev
+5. The TutorPicker grid renders automatically from `AGENTS_LIST`
