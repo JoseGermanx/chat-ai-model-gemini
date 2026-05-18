@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { useApp } from "../../context/AppContext";
 import TutorBadge from "../TutorBadge/TutorBadge";
 import "./Sidebar.style.css";
@@ -9,10 +10,15 @@ const Sidebar = () => {
     activeChatId,
     setActiveChatId,
     handleDeleteChat,
+    handleRenameChat,
     sidebarOpen,
     setSidebarOpen,
     setShowTutorPicker,
   } = useApp();
+
+  const [editingChatId, setEditingChatId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const inputRef = useRef(null);
 
   const openTutorPicker = () => setShowTutorPicker(true);
 
@@ -24,6 +30,34 @@ const Sidebar = () => {
   const formatDate = (iso) => {
     const d = new Date(iso);
     return d.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+  };
+
+  const startEditing = (e, chat) => {
+    e.stopPropagation();
+    setEditingChatId(chat.id);
+    setEditingTitle(chat.title);
+    // Focus happens via autoFocus on the input
+  };
+
+  const commitRename = async () => {
+    if (!editingChatId) return;
+    await handleRenameChat(editingChatId, editingTitle);
+    setEditingChatId(null);
+    setEditingTitle("");
+  };
+
+  const cancelRename = () => {
+    setEditingChatId(null);
+    setEditingTitle("");
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitRename();
+    } else if (e.key === "Escape") {
+      cancelRename();
+    }
   };
 
   return (
@@ -48,27 +82,55 @@ const Sidebar = () => {
                 key={chat.id}
                 className={`chat-item ${activeChatId === chat.id ? "active" : ""}`}
               >
-                <button
-                  className="chat-item-btn"
-                  onClick={() => selectChat(chat.id)}
-                >
-                  <span className="chat-item-title-row">
-                    <TutorBadge agentId={chat.agent_id} />
-                    <span className="chat-item-title">{chat.title}</span>
-                  </span>
-                  <span className="chat-item-date">{formatDate(chat.updated_at)}</span>
-                </button>
-                <button
-                  className="chat-delete-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteChat(chat.id);
-                  }}
-                  title="Eliminar chat"
-                  aria-label="Eliminar chat"
-                >
-                  ×
-                </button>
+                {editingChatId === chat.id ? (
+                  <div className="chat-item-edit">
+                    <input
+                      ref={inputRef}
+                      className="chat-title-input"
+                      value={editingTitle}
+                      onChange={(e) => setEditingTitle(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      onBlur={commitRename}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                      maxLength={80}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    className="chat-item-btn"
+                    onClick={() => selectChat(chat.id)}
+                  >
+                    <span className="chat-item-title-row">
+                      <TutorBadge agentId={chat.agent_id} />
+                      <span className="chat-item-title">{chat.title}</span>
+                    </span>
+                    <span className="chat-item-date">{formatDate(chat.updated_at)}</span>
+                  </button>
+                )}
+                {editingChatId !== chat.id && (
+                  <>
+                    <button
+                      className="chat-rename-btn"
+                      onClick={(e) => startEditing(e, chat)}
+                      title="Renombrar chat"
+                      aria-label="Renombrar chat"
+                    >
+                      ✏
+                    </button>
+                    <button
+                      className="chat-delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteChat(chat.id);
+                      }}
+                      title="Eliminar chat"
+                      aria-label="Eliminar chat"
+                    >
+                      ×
+                    </button>
+                  </>
+                )}
               </li>
             ))}
           </ul>

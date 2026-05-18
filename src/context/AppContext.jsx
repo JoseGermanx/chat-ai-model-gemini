@@ -6,6 +6,7 @@ import {
   getChatsByProfileId,
   createChat,
   deleteChat as deleteChatService,
+  updateChatTitle,
 } from "../services/chatService";
 import { upsertProfile } from "../services/profileService";
 
@@ -94,6 +95,13 @@ export function AppProvider({ children }) {
     );
   }, []);
 
+  const handleRenameChat = useCallback(async (chatId, newTitle) => {
+    const trimmed = newTitle.trim();
+    if (!trimmed) return;
+    await updateChatTitle(chatId, trimmed);
+    updateChatTitleInList(chatId, trimmed);
+  }, [updateChatTitleInList]);
+
   const refreshChatTimestamp = useCallback((chatId) => {
     setChats((prev) =>
       prev.map((c) =>
@@ -116,6 +124,7 @@ export function AppProvider({ children }) {
       handleNewChat,
       handleDeleteChat,
       updateChatTitleInList,
+      handleRenameChat,
       refreshChatTimestamp,
       sidebarOpen,
       setSidebarOpen,
@@ -142,6 +151,7 @@ export function AppProvider({ children }) {
       handleNewChat,
       handleDeleteChat,
       updateChatTitleInList,
+      handleRenameChat,
       refreshChatTimestamp,
       updateNotesCount,
     ]

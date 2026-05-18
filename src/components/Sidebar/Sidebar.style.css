@@ -175,6 +175,58 @@
   background: rgba(229, 62, 62, 0.08);
 }
 
+.chat-rename-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #aaa);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  margin-right: 2px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.chat-item:hover .chat-rename-btn {
+  display: flex;
+}
+
+.chat-rename-btn:hover {
+  color: var(--accent, #4a90d9);
+  background: rgba(74, 144, 217, 0.1);
+}
+
+.chat-item-edit {
+  flex: 1;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.chat-title-input {
+  width: 100%;
+  background: var(--bg-elevated, #fff);
+  border: 1px solid var(--accent, #4a90d9);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.82rem;
+  font-family: var(--font-sans, inherit);
+  color: var(--text-primary, #111);
+  outline: none;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .chat-title-input {
+  background: var(--bg-elevated, #2a2a2a);
+  color: var(--text-primary, #e5e5e5);
+  border-color: var(--accent, #4a90d9);
+}
+
 /* Dark mode */
 [data-theme="dark"] .sidebar {
   --sidebar-bg: #1a1a1a;
@@ -209,11 +261,13 @@
     border-right: 1px solid var(--border, rgba(0, 0, 0, 0.08));
   }
 
-  .chat-item:hover .chat-delete-btn {
+  .chat-item:hover .chat-delete-btn,
+  .chat-item:hover .chat-rename-btn {
     display: none;
   }
 
-  .chat-item .chat-delete-btn {
+  .chat-item .chat-delete-btn,
+  .chat-item .chat-rename-btn {
     display: flex;
   }
 }
