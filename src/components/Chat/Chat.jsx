@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import Markdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Loading from "../Loading/Loading";
 import TutorBadge from "../TutorBadge/TutorBadge";
 import NotesPanel from "../Notes/NotesPanel";
@@ -20,33 +22,52 @@ const PROMPT_CHIPS = [
   "¿Qué es async/await?",
 ];
 
-// React component for code blocks — avoids DOM mutation and memory leaks
-const PreWithCopy = ({ children = null }) => {
+const CodeBlock = ({ language, children }) => {
   const [copied, setCopied] = useState(false);
-  const preRef = useRef(null);
+  const code = String(children).replace(/\n$/, "");
 
   const handleCopy = () => {
-    const code = preRef.current?.querySelector("code");
-    if (code) {
-      navigator.clipboard.writeText(code.innerText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   return (
-    <pre ref={preRef} style={{ position: "relative" }}>
-      {children}
-      <button className="copy-button" onClick={handleCopy}>
-        {copied ? "¡Copiado!" : "Copiar"}
-      </button>
-    </pre>
+    <div className="code-block-wrapper">
+      <div className="code-block-header">
+        {language && <span className="code-lang-label">{language}</span>}
+        <button className="copy-button" onClick={handleCopy}>
+          {copied ? "¡Copiado!" : "Copiar"}
+        </button>
+      </div>
+      <SyntaxHighlighter
+        style={vscDarkPlus}
+        language={language || "text"}
+        PreTag="pre"
+        showLineNumbers
+        customStyle={{ margin: 0, borderRadius: 0, borderBottomLeftRadius: "var(--radius-md)", borderBottomRightRadius: "var(--radius-md)" }}
+        lineNumberStyle={{ color: "#4a4a5a", minWidth: "2.5em", userSelect: "none" }}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
   );
 };
 
-PreWithCopy.propTypes = { children: PropTypes.node };
+CodeBlock.propTypes = { language: PropTypes.string, children: PropTypes.node };
 
-const markdownComponents = { pre: PreWithCopy };
+const markdownComponents = {
+  pre({ children }) {
+    return <>{children}</>;
+  },
+  code({ className, children }) {
+    const match = /language-(\w+)/.exec(className || "");
+    if (match || String(children).includes("\n")) {
+      return <CodeBlock language={match?.[1]}>{children}</CodeBlock>;
+    }
+    return <code className={className}>{children}</code>;
+  },
+};
 
 const Chat = () => {
   const {
