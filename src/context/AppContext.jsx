@@ -18,6 +18,13 @@ export function AppProvider({ children }) {
   const [activeChatId, setActiveChatId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
   const [showTutorPicker, setShowTutorPicker] = useState(false);
+  const [showNotesPanel, setShowNotesPanel] = useState(false);
+  const [showNotesHistory, setShowNotesHistory] = useState(false);
+  const [notesCountByChat, setNotesCountByChat] = useState({});
+
+  const updateNotesCount = useCallback((chatId, count) => {
+    setNotesCountByChat((prev) => ({ ...prev, [chatId]: count }));
+  }, []);
 
   const loadChats = useCallback(async (profileId) => {
     const data = await getChatsByProfileId(profileId);
@@ -50,6 +57,9 @@ export function AppProvider({ children }) {
         setSupabaseProfile(null);
         setChats([]);
         setActiveChatId(null);
+        setShowNotesPanel(false);
+        setShowNotesHistory(false);
+        setNotesCountByChat({});
       }
     });
 
@@ -70,6 +80,9 @@ export function AppProvider({ children }) {
       setChats((prev) => prev.filter((c) => c.id !== chatId));
       if (activeChatId === chatId) {
         setActiveChatId(null);
+        setShowNotesPanel(false);
+        setShowNotesHistory(false);
+        setNotesCountByChat((prev) => { const n = { ...prev }; delete n[chatId]; return n; });
       }
     },
     [activeChatId]
@@ -108,6 +121,12 @@ export function AppProvider({ children }) {
       setSidebarOpen,
       showTutorPicker,
       setShowTutorPicker,
+      showNotesPanel,
+      setShowNotesPanel,
+      showNotesHistory,
+      setShowNotesHistory,
+      notesCountByChat,
+      updateNotesCount,
     }),
     [
       supabaseProfile,
@@ -116,11 +135,15 @@ export function AppProvider({ children }) {
       activeChatId,
       sidebarOpen,
       showTutorPicker,
+      showNotesPanel,
+      showNotesHistory,
+      notesCountByChat,
       loadChats,
       handleNewChat,
       handleDeleteChat,
       updateChatTitleInList,
       refreshChatTimestamp,
+      updateNotesCount,
     ]
   );
 

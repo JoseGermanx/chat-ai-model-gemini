@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Markdown from "react-markdown";
 import Loading from "../Loading/Loading";
 import TutorBadge from "../TutorBadge/TutorBadge";
+import NotesPanel from "../Notes/NotesPanel";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
 import { getChatById, updateChatHistory, updateChatTitle } from "../../services/chatService";
@@ -55,7 +56,12 @@ const Chat = () => {
     handleNewChat,
     updateChatTitleInList,
     refreshChatTimestamp,
+    showNotesPanel,
+    setShowNotesPanel,
+    notesCountByChat,
   } = useApp();
+
+  const notesCount = notesCountByChat[activeChatId] ?? 0;
 
   const activeChat = chats.find((c) => c.id === activeChatId);
   const agentId = activeChat?.agent_id ?? "js-core";
@@ -187,6 +193,7 @@ const Chat = () => {
   const isLoggedIn = !!googleProfile;
 
   return (
+    <div className="chat-page-wrapper">
     <div className="chat-page">
 
       {!isLoggedIn && (
@@ -230,6 +237,17 @@ const Chat = () => {
           <span className="tutor-header-specialty">
             {agent.specialty.slice(0, 2).join(" · ")}
           </span>
+          <button
+            className={`notes-toggle-btn${showNotesPanel ? " active" : ""}`}
+            onClick={() => setShowNotesPanel((p) => !p)}
+            aria-label={showNotesPanel ? "Cerrar notas" : "Abrir notas"}
+            title="Notas del chat"
+          >
+            📓
+            {notesCount > 0 && (
+              <span className="notes-count-badge">{notesCount}</span>
+            )}
+          </button>
         </div>
       )}
 
@@ -304,6 +322,8 @@ const Chat = () => {
           </div>
         </div>
       )}
+    </div>
+    {showNotesPanel && activeChatId && <NotesPanel />}
     </div>
   );
 };

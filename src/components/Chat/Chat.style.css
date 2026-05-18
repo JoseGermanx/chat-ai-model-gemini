@@ -3,12 +3,21 @@
 /* ─────────────────────────────────────────
    Page Layout
 ───────────────────────────────────────── */
+.chat-page-wrapper {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
 .chat-page {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  min-width: 0;
 }
 
 /* ─────────────────────────────────────────
@@ -28,6 +37,47 @@
   font-size: 0.72rem;
   color: var(--text-muted);
   margin-left: 2px;
+}
+
+.notes-toggle-btn {
+  position: relative;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.notes-toggle-btn:hover,
+.notes-toggle-btn.active {
+  background: var(--bg-elevated);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+
+.notes-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  pointer-events: none;
 }
 
 /* ─────────────────────────────────────────

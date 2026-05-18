@@ -24,6 +24,10 @@
   display: none;
 }
 
+.notes-panel-overlay {
+  display: none;
+}
+
 @keyframes overlay-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -36,6 +40,15 @@
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
     z-index: 199;
+    animation: overlay-in 0.2s ease;
+  }
+
+  .notes-panel-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 299;
     animation: overlay-in 0.2s ease;
   }
 }
