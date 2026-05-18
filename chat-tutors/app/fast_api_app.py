@@ -171,6 +171,7 @@ async def chat_endpoint(
         state={
             "agentId": body.agentId,
             "history": [h.model_dump() for h in body.history],
+            "message": body.message,
         },
     )
 

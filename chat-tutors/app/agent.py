@@ -112,6 +112,74 @@ _MODEL_CONFIGS: dict[str, tuple[float, float, int]] = {
     "algorithms": (0.5, 0.15, 20),
 }
 
+# ── Topic-based auto-routing ──────────────────────────────────────────────────
+
+# Keyword patterns (regex) per agent domain.  Used to override agentId routing
+# when the user's message clearly belongs to a different specialist's domain.
+_TOPIC_PATTERNS: dict[str, list[str]] = {
+    "typescript": [
+        r"\btypescript\b", r"\btsconfig\b", r"\bgenerics?\b",
+        r"\btype\s+alias\b", r"\bdecorator[s]?\b", r"\bunion\s+type[s]?\b",
+        r"\bintersection\s+type[s]?\b", r"\butility\s+type[s]?\b",
+        r"\btype\s+guard[s]?\b", r"\bstatic\s+typing\b",
+        r"\btipado\s+(estático|fuerte)\b",
+    ],
+    "react": [
+        r"\breact\b", r"\bjsx\b", r"\buseState\b", r"\buseEffect\b",
+        r"\buseRef\b", r"\buseContext\b", r"\buseReducer\b",
+        r"\buseMemo\b", r"\buseCallback\b", r"\bcontext\s+api\b",
+        r"\breact\s+router\b", r"\bsuspense\b",
+    ],
+    "async-js": [
+        r"\bpromise[s]?\b", r"\basync[\s/]await\b", r"\basync\s+function\b",
+        r"\bevent\s+loop\b", r"\bfetch\s+api\b", r"\bweb\s+worker[s]?\b",
+        r"\bmicrotask[s]?\b", r"\bmacrotask[s]?\b", r"\bgenerator\s+function\b",
+        r"\babortsignal\b", r"\babortcontroller\b",
+    ],
+    "node-backend": [
+        r"\bnode\.?js\b", r"\bexpress\.?js\b", r"\brest\s+api\b",
+        r"\bjwt\b", r"\boauth\b", r"\bmongodb\b", r"\bpostgresql\b",
+        r"\bmiddleware\b", r"\bbackend\b", r"\bhttp\s+server\b",
+    ],
+    "algorithms": [
+        r"\balgorithm[os]?\b", r"\bestructura[s]?\s+de\s+dato[s]?\b",
+        r"\bdata\s+structure[s]?\b", r"\bbig[- ]?o\b", r"\brecursi[oó]n\b",
+        r"\bprogramaci[oó]n\s+din[aá]mica\b", r"\bdynamic\s+programming\b",
+        r"\blista\s+enlazada\b", r"\blinked\s+list\b", r"\bbinary\s+search\b",
+        r"\border(amiento|nación)\b", r"\bsorting\b",
+        r"\bhash\s+map\b", r"\b[aá]rbol\s+(binario|de\s+búsqueda)\b",
+    ],
+    "js-core": [
+        r"\bclosure[s]?\b", r"\bprototype[s]?\b", r"\bscope\b", r"\bhoisting\b",
+        r"\bdom\b", r"\bevent\s+listener[s]?\b", r"\barray\s+method[s]?\b",
+        r"\besm\b", r"\bjavascript\b",
+    ],
+}
+
+
+def _detect_best_agent(message: str, preferred_agent_id: str) -> str:
+    """Return the specialist that best matches the message content.
+
+    Only overrides ``preferred_agent_id`` when another specialist scores at
+    least one hit AND the preferred specialist scores zero — avoiding spurious
+    re-routing on ambiguous or general questions.
+    """
+    scores: dict[str, int] = {}
+    for agent_id, patterns in _TOPIC_PATTERNS.items():
+        count = sum(1 for p in patterns if re.search(p, message, re.IGNORECASE))
+        if count:
+            scores[agent_id] = count
+
+    if not scores:
+        return preferred_agent_id
+
+    best = max(scores, key=lambda k: scores[k])
+    if best != preferred_agent_id and scores.get(preferred_agent_id, 0) == 0:
+        return best
+
+    return preferred_agent_id
+
+
 _VALIDATOR_PROMPT = (
     "Revisa el siguiente código JavaScript/TypeScript. Si hay un error crítico o "
     "algo importante a corregir, responde con una nota MUY breve (1-2 líneas, sin "
@@ -229,6 +297,11 @@ class TutorOrchestrator(BaseAgent):
         agent_id: str = ctx.session.state.get("agentId", DEFAULT_AGENT_ID)
         if agent_id not in _SYSTEM_PROMPTS:
             agent_id = DEFAULT_AGENT_ID
+
+        # Auto-route when the message clearly belongs to a different specialist.
+        user_message: str = ctx.session.state.get("message", "")
+        if user_message:
+            agent_id = _detect_best_agent(user_message, agent_id)
 
         specialist = self._get_specialist(agent_id)
 
