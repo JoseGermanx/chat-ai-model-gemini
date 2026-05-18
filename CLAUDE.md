@@ -73,10 +73,20 @@ Default agent when none is specified: `js-core`.
 Request: `{ message, agentId, history[], generateTitle? }`
 Response: `{ response, agentId, title? }`
 
+- Requires `Authorization: Bearer <supabase-jwt>` — validated via `client.auth.get_user(token)` before any agent call
 - `agentId` is stored in session state → orchestrator routes to the right specialist
 - `history` is injected into `LlmRequest.contents` via `inject_history` callback
 - Validator runs on code blocks (non-fatal — failure returns specialist response as-is)
 - `generateTitle: true` → backend generates title inline and returns it in `title`
+
+### Security — ADK Route Protection
+
+`get_fast_api_app()` mounts many internal REST endpoints (`/run`, `/run_sse`, `/list-apps`, `/apps/*/sessions`, `/eval`, `/debug`, etc.) that have no built-in auth. Two layers protect them in production:
+
+1. **`ADK_WEB_ENABLED` env var** — `web=False` by default; suppresses the playground UI. Set `ADK_WEB_ENABLED=true` in `chat-tutors/.env` for local dev only. Never set in Cloud Run.
+2. **HTTP middleware** (`_require_auth_for_adk_routes` in `fast_api_app.py`) — all routes except `/chat`, `/health`, `/version`, and `/docs` require a valid Supabase Bearer JWT. Returns `401` otherwise.
+
+Public paths (no JWT required): `/chat`, `/health`, `/version`, `/openapi.json`, `/docs`, `/docs/oauth2-redirect`, `/redoc`
 
 ---
 
@@ -136,13 +146,13 @@ Sidebar "+" button
 ```
 Chat.jsx handleSubmit
   → agentId = chats.find(activeChatId)?.agent_id ?? "js-core"
-  → supabase.functions.invoke("chat", { message, history, agentId })
-  → Edge Function: load agent config → startChat with isolated systemPrompt
+  → fetch(VITE_ADK_URL + "/chat", { Authorization: "Bearer <supabase-jwt>", body: { message, history, agentId } })
+  → ADK FastAPI: middleware validates JWT → TutorOrchestrator routes to specialist
   → specialist response
-  → if response has code blocks → validator agent (non-fatal chain)
-  → return { response, agentId }
+  → if response has code blocks → _validate_code() via direct Gemini call (non-fatal)
+  → return { response, agentId, title? }
   → updateChatHistory(chatId, finalHistory)   # persist to Supabase
-  → auto-generate title on first message (mode: "title")
+  → auto-generate title on first message (generateTitle: true)
 ```
 
 ### Message format (stored in chats.history JSON array)
@@ -248,6 +258,7 @@ Component-scoped CSS alongside each component. Global design tokens in `src/styl
 | `SUPABASE_URL` | Supabase project URL (JWT validation) |
 | `SUPABASE_ANON_KEY` | Supabase anonymous key |
 | `ALLOW_ORIGINS` | Comma-separated CORS origins |
+| `ADK_WEB_ENABLED` | `true` for local dev only — enables ADK playground UI. **Never set in Cloud Run.** Defaults to `false` (secure). |
 
 ---
 
