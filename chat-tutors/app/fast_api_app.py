@@ -11,7 +11,8 @@ import os
 import uuid
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 from google.adk.cli.fast_api import get_fast_api_app
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -29,13 +30,44 @@ APP_NAME = "app"
 allow_origins_raw = os.getenv("ALLOW_ORIGINS", "")
 allow_origins = allow_origins_raw.split(",") if allow_origins_raw else None
 
+# web=True exposes all ADK playground REST endpoints without auth — only enable in local dev
+_web_enabled = os.getenv("ADK_WEB_ENABLED", "false").lower() == "true"
+
 app: FastAPI = get_fast_api_app(
     agents_dir=AGENT_DIR,
-    web=True,
+    web=_web_enabled,
     allow_origins=allow_origins,
 )
 app.title = "chat-tutors"
 app.description = "ADK-powered multi-tutor programming assistant"
+
+
+# ── Auth middleware — protect all ADK playground routes ───────────────────────
+
+_PUBLIC_PATHS = {"/chat", "/health", "/version", "/openapi.json", "/docs", "/docs/oauth2-redirect", "/redoc"}
+
+
+@app.middleware("http")
+async def _require_auth_for_adk_routes(request: Request, call_next):
+    """Block all ADK internal endpoints unless a valid Supabase Bearer JWT is provided.
+
+    /chat has its own per-request auth; /health and docs are public.
+    Everything else (ADK playground REST API) requires authentication.
+    """
+    if request.url.path in _PUBLIC_PATHS or request.url.path.startswith("/docs"):
+        return await call_next(request)
+
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+
+    token = auth.removeprefix("Bearer ")
+    try:
+        await asyncio.to_thread(_validate_supabase_token, token)
+    except HTTPException:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+
+    return await call_next(request)
 
 
 # ── Request / response models ─────────────────────────────────────────────────
