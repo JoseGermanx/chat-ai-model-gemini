@@ -2,8 +2,10 @@
 import asyncio
 import os
 import re
+from pathlib import Path
 from typing import AsyncGenerator
 
+from dotenv import load_dotenv
 from google.adk.agents import Agent, BaseAgent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.invocation_context import InvocationContext
@@ -13,6 +15,8 @@ from google.adk.models import Gemini
 from google.adk.models.llm_request import LlmRequest
 from google.adk.models.llm_response import LlmResponse
 from google.genai import types
+
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 # ── Credential bootstrap ───────────────────────────────────────────────────────
 # Prefer AI Studio (API key) for local dev; fall back to Vertex AI (GCP) for prod.

@@ -9,6 +9,7 @@
 import asyncio
 import os
 import uuid
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException, Request
@@ -20,7 +21,8 @@ from google.genai import types
 from pydantic import BaseModel
 from supabase import create_client
 
-load_dotenv()
+# Load .env relative to this file so the correct vars are picked up regardless of CWD.
+load_dotenv(Path(__file__).parent.parent / ".env", override=True)
 
 AGENT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUPABASE_URL = os.environ["SUPABASE_URL"]
