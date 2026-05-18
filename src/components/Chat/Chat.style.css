@@ -12,6 +12,25 @@
 }
 
 /* ─────────────────────────────────────────
+   Tutor Header
+───────────────────────────────────────── */
+.tutor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  flex-shrink: 0;
+}
+
+.tutor-header-specialty {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+/* ─────────────────────────────────────────
    Welcome / Empty State
 ───────────────────────────────────────── */
 .welcome-state {

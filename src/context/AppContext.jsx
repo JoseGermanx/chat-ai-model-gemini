@@ -17,6 +17,7 @@ export function AppProvider({ children }) {
   const [chats, setChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
+  const [showTutorPicker, setShowTutorPicker] = useState(false);
 
   const loadChats = useCallback(async (profileId) => {
     const data = await getChatsByProfileId(profileId);
@@ -55,9 +56,9 @@ export function AppProvider({ children }) {
     return () => subscription.unsubscribe();
   }, [loadChats]);
 
-  const handleNewChat = useCallback(async () => {
+  const handleNewChat = useCallback(async (agentId = "js-core") => {
     if (!supabaseProfile) return;
-    const chat = await createChat(supabaseProfile.id);
+    const chat = await createChat(supabaseProfile.id, agentId);
     setChats((prev) => [chat, ...prev]);
     setActiveChatId(chat.id);
     return chat;
@@ -105,6 +106,8 @@ export function AppProvider({ children }) {
       refreshChatTimestamp,
       sidebarOpen,
       setSidebarOpen,
+      showTutorPicker,
+      setShowTutorPicker,
     }),
     [
       supabaseProfile,
@@ -112,6 +115,7 @@ export function AppProvider({ children }) {
       chats,
       activeChatId,
       sidebarOpen,
+      showTutorPicker,
       loadChats,
       handleNewChat,
       handleDeleteChat,

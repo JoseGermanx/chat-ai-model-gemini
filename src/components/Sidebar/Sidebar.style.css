@@ -125,13 +125,22 @@
   min-width: 0;
 }
 
+.chat-item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
 .chat-item-title {
   font-size: 0.82rem;
   color: var(--text-primary, #111);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .chat-item-date {

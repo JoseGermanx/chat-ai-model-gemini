@@ -1,4 +1,5 @@
 import { useApp } from "../../context/AppContext";
+import TutorBadge from "../TutorBadge/TutorBadge";
 import "./Sidebar.style.css";
 import ia from "../../assets/star-1-svgrepo-com.svg";
 
@@ -7,11 +8,13 @@ const Sidebar = () => {
     chats,
     activeChatId,
     setActiveChatId,
-    handleNewChat,
     handleDeleteChat,
     sidebarOpen,
     setSidebarOpen,
+    setShowTutorPicker,
   } = useApp();
+
+  const openTutorPicker = () => setShowTutorPicker(true);
 
   const selectChat = (id) => {
     setActiveChatId(id);
@@ -30,7 +33,7 @@ const Sidebar = () => {
           <img src={ia} alt="JS AI" width={18} />
           <span>JS Assistant</span>
         </div>
-        <button className="new-chat-btn" onClick={handleNewChat} title="Nuevo chat">
+        <button className="new-chat-btn" onClick={openTutorPicker} title="Nuevo chat">
           +
         </button>
       </div>
@@ -49,7 +52,10 @@ const Sidebar = () => {
                   className="chat-item-btn"
                   onClick={() => selectChat(chat.id)}
                 >
-                  <span className="chat-item-title">{chat.title}</span>
+                  <span className="chat-item-title-row">
+                    <TutorBadge agentId={chat.agent_id} />
+                    <span className="chat-item-title">{chat.title}</span>
+                  </span>
                   <span className="chat-item-date">{formatDate(chat.updated_at)}</span>
                 </button>
                 <button

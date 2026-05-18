@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import Markdown from "react-markdown";
 import Loading from "../Loading/Loading";
+import TutorBadge from "../TutorBadge/TutorBadge";
 import { useApp } from "../../context/AppContext";
 import { supabase } from "../../lib/supabase";
 import { getChatById, updateChatHistory, updateChatTitle } from "../../services/chatService";
+import { getAgent } from "../../config/agents";
 import "./Chat.style.css";
 import avatar from "./../../assets/person-svgrepo-com.svg";
 import arrow from "./../../assets/arrow.svg";
@@ -18,7 +20,7 @@ const PROMPT_CHIPS = [
 ];
 
 // React component for code blocks — avoids DOM mutation and memory leaks
-const PreWithCopy = ({ children }) => {
+const PreWithCopy = ({ children = null }) => {
   const [copied, setCopied] = useState(false);
   const preRef = useRef(null);
 
@@ -42,18 +44,22 @@ const PreWithCopy = ({ children }) => {
 };
 
 PreWithCopy.propTypes = { children: PropTypes.node };
-PreWithCopy.defaultProps = { children: null };
 
 const markdownComponents = { pre: PreWithCopy };
 
 const Chat = () => {
   const {
     googleProfile,
+    chats,
     activeChatId,
     handleNewChat,
     updateChatTitleInList,
     refreshChatTimestamp,
   } = useApp();
+
+  const activeChat = chats.find((c) => c.id === activeChatId);
+  const agentId = activeChat?.agent_id ?? "js-core";
+  const agent = getAgent(agentId);
 
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
@@ -101,7 +107,7 @@ const Chat = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("chat", {
-        body: { message: text, history: historySnapshot },
+        body: { message: text, history: historySnapshot, agentId },
       });
       if (error) throw error;
 
@@ -204,6 +210,15 @@ const Chat = () => {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {isLoggedIn && activeChatId && (
+        <div className="tutor-header">
+          <TutorBadge agentId={agentId} showName />
+          <span className="tutor-header-specialty">
+            {agent.specialty.slice(0, 2).join(" · ")}
+          </span>
         </div>
       )}
 
