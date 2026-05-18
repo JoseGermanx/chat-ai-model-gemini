@@ -286,10 +286,43 @@ Supabase Auth with Google and GitHub OAuth providers. `onAuthStateChange` listen
 
 ## Styling
 
-Component-scoped CSS alongside each component. Global design tokens in `src/styles/vars.css`:
-- Light/dark palette via `[data-theme="dark"]` selector on `document.body`
-- Key variables: `--bg`, `--bg-surface`, `--bg-elevated`, `--accent`, `--border`, `--radius-md`, `--font-sans`, `--font-mono`
-- Agent card colors are injected as CSS custom properties: `--agent-color`, `--agent-color-text`
+Component-scoped CSS alongside each component. Global design tokens in `src/styles/vars.css`.
+
+### Design Language — "Warm Editorial Tech"
+
+**Aesthetic direction**: Warm neutrals (cream light / near-black dark) + violet accent. Clean typographic hierarchy. Inspired by Linear/Vercel startup feel.
+
+**Fonts** (loaded from Google Fonts in `src/index.css`):
+| Variable | Font | Used for |
+|----------|------|----------|
+| `--font-display` | `Bricolage Grotesque` | Headings, brand, modal titles, tutor names |
+| `--font-sans` | `Plus Jakarta Sans` | All body/UI text |
+| `--font-mono` | `JetBrains Mono` | Code blocks |
+
+**Color tokens** (`src/styles/vars.css`):
+
+| Token | Light | Dark | Purpose |
+|-------|-------|------|---------|
+| `--bg` | `#F5F4F0` | `#0E0D0B` | Page background (warm cream / warm black) |
+| `--bg-surface` | `#FFFFFF` | `#161412` | Cards, panels, navbar |
+| `--bg-elevated` | `#ECEAE4` | `#1E1C19` | Hover states, elevated surfaces |
+| `--accent` | `#7C3AED` | `#A78BFA` | Violet — buttons, links, active states |
+| `--accent-subtle` | `rgba(124,58,237,.07)` | `rgba(167,139,250,.08)` | Active chat bg, chip hover bg |
+| `--accent-glow` | `rgba(124,58,237,.14)` | `rgba(167,139,250,.18)` | Focus rings, button shadows |
+| `--danger` | `#DC2626` | `#F87171` | Delete actions |
+
+**Shadow scale**: `--shadow-xs` → `--shadow-xl` (5 levels)
+**Radius scale**: `--radius-xs` (5px) → `--radius-xl` (24px) + `--radius-full`
+
+**Component-specific design notes**:
+- Sidebar active item: 2.5px violet left-border indicator, `--accent-subtle` background
+- Navbar / tutor header: glass effect via `backdrop-filter: blur`
+- Chat bubbles: user messages in `--bg-user-msg` (`#6D28D9`), AI messages flat text on bg
+- TutorPicker modal: spring animation (`cubic-bezier(0.34, 1.56, 0.64, 1)`)
+- Send button: violet with `box-shadow` glow on hover
+
+Light/dark palette toggled via `[data-theme="dark"]` selector on `document.body`.
+Agent card colors injected as CSS custom properties: `--agent-color`, `--agent-color-text`.
 
 ---
 
